@@ -1,0 +1,92 @@
+<div id="journal-header-container">
+	<div id="journal-header-avatar" class="journal-header">
+		<img src="../assets/canary-v5.png" id="journal-header-image">
+	</div>
+	<div id="journal-header-thought" class="journal-header">
+		<fa-icon *ngIf="(journaledToday | async) == 'new' || (journaledToday | async) == 'false'" [icon]="faPencilAlt"></fa-icon>
+		<b *ngIf="(journaledToday | async) == 'true'">φ</b>
+	</div>
+	<div id="journal-header-copy" class="journal-header">
+	</div>
+</div>
+<mat-card id="journal-entry-card" class="journal-card">
+	<mat-card-header  *ngIf="(journaledToday | async) == 'new'" id="journal-card-header">
+		<mat-card-title>This is your journal.</mat-card-title>
+		<mat-card-subtitle>List all of the day's significant <b>events</b> and any <b>symptoms</b> you experienced in the <b>Journal Entry</b> section below. Since this is your first time, you should also read the <b>guide</b>.</mat-card-subtitle>
+	</mat-card-header>
+	<mat-card-header  *ngIf="(journaledToday | async) == 'false'" id="journal-card-header">
+		<mat-card-title>You haven't journaled today.</mat-card-title>
+		<mat-card-subtitle>List all of the day's significant <b>events</b> and any <b>symptoms</b> you experienced in the <b>Journal Entry</b> section below.</mat-card-subtitle>
+	</mat-card-header>
+	<mat-card-header  *ngIf="(journaledToday | async) == 'true'" id="journal-card-header">
+		<mat-card-title>You're done journaling for the day.</mat-card-title>
+		<mat-card-subtitle>Come back tomorrow to submit another entry. In the meantime, you can look at insights presented in the <b>Journal View</b> section.</mat-card-subtitle>
+	</mat-card-header>
+	<mat-card-content>
+	</mat-card-content>
+</mat-card>
+<div id="journal-entry-form">
+	<mat-accordion>
+		<mat-expansion-panel (opened)="panelOpenState = true"
+		(closed)="panelOpenState = false" [expanded]="(journaledToday | async) == 'new' || (journaledToday | async) == 'false'">
+		<mat-expansion-panel-header>
+			<mat-panel-title>
+				Journal Entry
+			</mat-panel-title>
+			<mat-panel-description *ngIf="(journaledToday | async) == 'new' || (journaledToday | async) == 'false'">
+				Enter journal data here.
+			</mat-panel-description>
+			<mat-panel-description *ngIf="(journaledToday | async) == 'true' && panelOpenState == false">
+				Today's entry submitted
+			</mat-panel-description>
+			<mat-panel-description *ngIf="(journaledToday | async) == 'true' && panelOpenState == true">
+				You're done here today. Come back tomorrow.
+			</mat-panel-description>
+		</mat-expansion-panel-header>
+		<div class="form-group">
+			<mat-form-field id="events-chip-list" class="chip-list">
+				<mat-chip-list #eventList aria-label="Event selection">
+					<mat-chip *ngFor="let myEvent of formEvents" [selectable]="selectable"
+					[removable]="removable" (removed)="removeEventChip(myEvent)">
+					{{ myEvent }}
+					<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+				</mat-chip>
+				<input [disabled]="(journaledToday | async) == 'true'" placeholder="Today's events... (potatoes, rainy, happy, tennis, etc.)"
+				[matChipInputFor]="eventList"
+				[matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+				[matChipInputAddOnBlur]="addOnBlur"
+				(matChipInputTokenEnd)="addEventChip($event)">
+			</mat-chip-list>
+		</mat-form-field>
+	</div>
+	<div class="form-group">
+		<mat-form-field id="conditions-chip-list" class="chip-list">
+			<mat-chip-list #conditionList aria-label="Condition selection">
+				<mat-chip *ngFor="let myCondition of formConditions" [selectable]="selectable"
+				[removable]="removable" (removed)="removeConditionChip(myCondition)">
+				{{myCondition}}
+				<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+			</mat-chip>
+			<input [disabled]="(journaledToday | async) == 'true'" placeholder="Today's symptoms... (back pain, nausea, dizziness, etc.)"
+			[matChipInputFor]="conditionList"
+			[matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+			[matChipInputAddOnBlur]="addOnBlur"
+			(matChipInputTokenEnd)="addConditionChip($event)">
+		</mat-chip-list>
+	</mat-form-field>
+</div>
+<div class="button-container">
+	<button mat-button *ngIf="(formEvents && formConditions) && (formEvents[0] && formConditions[0])" (click)="createEntry()">SUBMIT</button>
+	<div *ngIf="(submissionStatus | async) == true" id="entry-success">
+		Today's entry has been submitted.
+	</div>
+	<div *ngIf="(submissionStatus | async) == false" id="entry-fail">
+		There was an error.
+	</div>
+</div>
+</mat-expansion-panel>
+</mat-accordion>
+</div>
+<div *ngFor="let condition of myConditions | async">
+	{{ condition }}
+</div>

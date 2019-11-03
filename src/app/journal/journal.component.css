@@ -1,0 +1,55 @@
+#journal-header-container {
+	width: calc(100vw - 164px);
+	display: inline-flex;
+	margin: 5px 50px;
+}
+
+#journal-header-avatar {
+	width: 150px;
+}
+
+#journal-header-image {
+	width: 100%;
+	height: auto;
+}
+
+#journal-header-thought {
+	font-size: 40px;
+}
+
+#journal-header-copy {
+	font-size: 40px;
+	flex-grow: 1;
+}
+
+.journaled {
+	display: none;
+}
+
+.journal-card {
+	margin: 0 50px;
+}
+
+#journal-entry-form {
+	margin: 5px 50px;
+	width: calc(100% - 100px);
+}
+
+.form-group {
+	margin: 15px 0;
+}
+
+.button-container {
+	margin-bottom: 5px;
+	text-align: center;
+}
+
+#entry-success {
+	margin-bottom: 10px;
+	color: green;
+}
+
+#entry-fail {
+	margin-bottom: 10px;
+	color: red;
+}

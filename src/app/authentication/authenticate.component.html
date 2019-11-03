@@ -1,0 +1,31 @@
+<div id="auth-container">
+	<div id="auth-header">
+		<div id="auth-header-avatar">
+			<img id="auth-header-logo" src="../assets/canary-v5.png">
+		</div>
+	</div>
+	<mat-card class="auth-card">
+		<mat-card-header id="auth-card-header">
+			<mat-card-title>Sign In</mat-card-title>
+			<mat-card-subtitle>You can create an account here too.</mat-card-subtitle>
+		</mat-card-header>
+		<mat-card-content>
+			<div class="form-group">
+				<mat-form-field>
+					<input matInput type="email" placeholder="Email" id="emailField" name="emailField" required [(ngModel)]="email" #emailField="ngModel">
+				</mat-form-field>
+			</div>
+
+			<div class="form-group">
+				<mat-form-field>
+					<input matInput type="password" placeholder="Password" id="passwordField" name="passwordField" required [(ngModel)]="password" #passwordField="ngModel">
+				</mat-form-field>
+			</div>
+		</mat-card-content>
+		<mat-card-actions>
+			<div class="button-container">
+				<button mat-raised-button *ngIf="emailField.valid && passwordField.valid" type="submit" class="btn btn-success" (click)="authenticate()">DONE</button>
+			</div>
+		</mat-card-actions>
+	</mat-card>
+</div>
