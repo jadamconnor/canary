@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { FormControl } from '@angular/forms';
 import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from '@angular/fire/firestore';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, from } from 'rxjs';
 import { Entry } from '../entry';
 import { AuthenticateService } from '../authentication/authenticate.service';
 import { JournalService } from './journal.service';
@@ -34,8 +34,10 @@ export class JournalComponent implements OnInit {
   private myEvents: Observable<string[]>;
   private myConditions: Observable<string[]>;
   private myDoc: Observable<any>;
-  private panelOpenState = false;
+  private entryOpenState = false;
+  private viewOpenState = false;
   private journalData: Observable<any>;
+  private conditionData = new Subject<any>();
 
   constructor(
     private authService: AuthenticateService,
@@ -98,6 +100,23 @@ export class JournalComponent implements OnInit {
     })
   }
 
+  getKeys(obj){
+    return Object.keys(obj)
+  }
+
+  getConditionData(condition: string) {
+    this.journalService.getConditionData(condition)
+    .subscribe(data => {
+      console.log(data)
+      this.conditionData.next(data);
+    });
+  }
+
+  getCorrelation(event: string, condition: string): Observable<number> {
+    this.journalService.getPhiCo(event, condition).subscribe(data => console.log(data))
+    return this.journalService.getPhiCo(event, condition);
+  }
+
   signOut() {
     this.authService.signOut();
   }
@@ -107,8 +126,7 @@ export class JournalComponent implements OnInit {
     this.journaledToday = this.journalService.journaledToday();
     this.myConditions = this.journalService.getMyConditions();
     this.myEvents = this.journalService.getMyEvents();
-    this.journalData = this.journalService.getJournalData();
-    this.journalData.subscribe(data => console.log(data.dizzy))
+    this.journalData = this.journalService.formJournalData();
   }
 
 }

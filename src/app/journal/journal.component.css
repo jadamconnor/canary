@@ -30,12 +30,12 @@
 	margin: 0 50px;
 }
 
-#journal-entry-form {
-	margin: 5px 50px;
+#journal-entry-container, #journal-view-container {
+	margin: 5px 50px 0px;
 	width: calc(100% - 100px);
 }
 
-.form-group {
+.form-group, .view-group {
 	margin: 15px 0;
 }
 
@@ -52,4 +52,17 @@
 #entry-fail {
 	margin-bottom: 10px;
 	color: red;
+}
+
+.view-group {
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+}
+
+.data-list {
+	width: 20%;
+}
+
+.condition-card {
 }

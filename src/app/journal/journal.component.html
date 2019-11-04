@@ -25,10 +25,10 @@
 	<mat-card-content>
 	</mat-card-content>
 </mat-card>
-<div id="journal-entry-form">
+<div id="journal-entry-container">
 	<mat-accordion>
-		<mat-expansion-panel (opened)="panelOpenState = true"
-		(closed)="panelOpenState = false" [expanded]="(journaledToday | async) == 'new' || (journaledToday | async) == 'false'">
+		<mat-expansion-panel (opened)="entryOpenState = true"
+		(closed)="entryOpenState = false" [expanded]="(journaledToday | async) == 'new' || (journaledToday | async) == 'false'">
 		<mat-expansion-panel-header>
 			<mat-panel-title>
 				Journal Entry
@@ -36,11 +36,11 @@
 			<mat-panel-description *ngIf="(journaledToday | async) == 'new' || (journaledToday | async) == 'false'">
 				Enter journal data here.
 			</mat-panel-description>
-			<mat-panel-description *ngIf="(journaledToday | async) == 'true' && panelOpenState == false">
+			<mat-panel-description *ngIf="(journaledToday | async) == 'true' && entryOpenState == false">
 				Today's entry submitted
 			</mat-panel-description>
-			<mat-panel-description *ngIf="(journaledToday | async) == 'true' && panelOpenState == true">
-				You're done here today. Come back tomorrow.
+			<mat-panel-description *ngIf="(journaledToday | async) == 'true' && entryOpenState == true">
+				You're done here today
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 		<div class="form-group">
@@ -87,6 +87,36 @@
 </mat-expansion-panel>
 </mat-accordion>
 </div>
-<div *ngFor="let condition of myConditions | async">
-	{{ condition }}
+<div id="journal-view-container">
+	<mat-accordion>
+		<mat-expansion-panel (opened)="viewOpenState = true"
+		(closed)="viewOpenState = false" [expanded]="(journaledToday | async) == 'true'">
+		<mat-expansion-panel-header>
+			<mat-panel-title>
+				Journal View
+			</mat-panel-title>
+			<mat-panel-description *ngIf="viewOpenState == false">
+				View journal data here
+			</mat-panel-description>
+			<mat-panel-description *ngIf="viewOpenState == true">
+				Your symptoms
+			</mat-panel-description>
+		</mat-expansion-panel-header>
+		<div class="view-group">
+			<div *ngFor="let item of (journalData | async) | keyvalue" class="data-list">
+				<div class="condition-card">
+					<h3>{{item.key}}:</h3>
+				</div>
+				<div *ngFor="let thing of item.value | keyvalue">
+					<div *ngIf="thing.value >= 0.25" [ngStyle]="{'background-color': 'rgba(255,0,0,'+thing.value+')'}" style="color:white">
+						<b>{{thing.key}}</b>
+					</div>
+					<div *ngIf="thing.value <= -0.25" [ngStyle]="{'background-color': 'rgba(0,255,0,'+(thing.value+(-thing.value*2))+')'}" style="color:white">
+						<b>{{thing.key}}</b>
+					</div>
+				</div>
+			</div>
+		</div>
+	</mat-expansion-panel>
+</mat-accordion>
 </div>

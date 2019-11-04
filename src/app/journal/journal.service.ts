@@ -127,8 +127,9 @@ export class JournalService {
 	}
 
 	getPhiCo(event: string, condition: string): Observable<number> {
+		let i = 1;
 		let phiArr = [0, 0, 0, 0];
-		let cor = new Subject<number>();
+		let co = new Subject<number>();
 		this.user.subscribe(user => {
 			this.userDoc = this.db.doc<UserDoc>(`users/${user.uid}`);
 			this.userDoc.collection<Entry>('entries').valueChanges()
@@ -143,11 +144,13 @@ export class JournalService {
 					} else if (entry.conditions.includes(condition) && entry.events.includes(event)) {
 						phiArr[3] += 1;
 					}
-				}
-				cor.next(this.phi(phiArr));
-			})
-		})
-		return cor;
+				};
+				co.next(this.phi(phiArr));
+				// Don't forget to reset the table or the function will continue to increment its elements
+				phiArr = [0, 0, 0, 0];
+			});
+		});
+		return co;
 	}
 
 	phi(table: number[]): number {
@@ -159,23 +162,32 @@ export class JournalService {
 			(table[0] + table[2]));
 	}
 
-	getJournalData(): Observable<any> {
+	formJournalData(): Observable<any> {
 		let jData = {};
 		let journalData = new Subject<any>();
 		this.getMyConditions().subscribe(conditions => {
-      conditions.forEach(condition => {
-        jData[condition] = {};
-        this.getMyEvents().subscribe(events => {
-          events.forEach(event => {
-            this.getPhiCo(event, condition).subscribe(data => {
-              jData[condition][event] = data;
-            });
-          });
-        });
-      });
-    journalData.next(jData);
-    });
-    return journalData;
+			conditions.forEach(condition => {
+				jData[condition] = {};
+				this.getMyEvents().subscribe(events => {
+					events.forEach(event => {
+						// We should try to only use event-condition combinations that actually occur.
+						this.getPhiCo(event, condition).subscribe(data => {
+							jData[condition][event] = data;
+						});
+					});
+				});
+			});
+			journalData.next(jData);
+		});
+		return journalData;
+	}
+
+	getConditionData(condition: string): Observable<any> {
+		let cData = new Subject<any>();
+		this.formJournalData().subscribe(data => {
+			cData.next(data[condition]);
+		})
+		return cData;
 	}
 
 	getMyEvents(): Observable<string[]> {
