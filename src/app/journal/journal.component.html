@@ -3,7 +3,7 @@
 		<img src="../assets/canary-v5.png" id="journal-header-image">
 	</div>
 	<div id="journal-header-thought" class="journal-header">
-		<fa-icon *ngIf="(journaledToday | async) == 'new' || (journaledToday | async) == 'false'" [icon]="faPencilAlt"></fa-icon>
+		<fa-icon *ngIf="(journaledToday | async) == 'new' || (journaledToday | async) == 'false'" [icon]="faBook"></fa-icon>
 		<b *ngIf="(journaledToday | async) == 'true'">φ</b>
 	</div>
 	<div id="journal-header-copy" class="journal-header">
@@ -34,7 +34,7 @@
 				Journal Entry
 			</mat-panel-title>
 			<mat-panel-description *ngIf="(journaledToday | async) == 'new' || (journaledToday | async) == 'false'">
-				Enter journal data here.
+				Enter journal data here
 			</mat-panel-description>
 			<mat-panel-description *ngIf="(journaledToday | async) == 'true' && entryOpenState == false">
 				Today's entry submitted
@@ -52,11 +52,19 @@
 					<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
 				</mat-chip>
 				<input [disabled]="(journaledToday | async) == 'true'" placeholder="Today's events... (potatoes, rainy, happy, tennis, etc.)"
+				#eventInput
+				[formControl]="eventCtrl"
+				[matAutocomplete]="autoEvent"
 				[matChipInputFor]="eventList"
 				[matChipInputSeparatorKeyCodes]="separatorKeysCodes"
 				[matChipInputAddOnBlur]="addOnBlur"
 				(matChipInputTokenEnd)="addEventChip($event)">
 			</mat-chip-list>
+			<mat-autocomplete #autoEvent="matAutocomplete" (optionSelected)="selectedEvent($event)">
+				<mat-option *ngFor="let event of filteredEvents | async" [value]="event">
+					{{ event }}
+				</mat-option>
+			</mat-autocomplete>
 		</mat-form-field>
 	</div>
 	<div class="form-group">
@@ -64,15 +72,23 @@
 			<mat-chip-list #conditionList aria-label="Condition selection">
 				<mat-chip *ngFor="let myCondition of formConditions" [selectable]="selectable"
 				[removable]="removable" (removed)="removeConditionChip(myCondition)">
-				{{myCondition}}
+				{{ myCondition }}
 				<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
 			</mat-chip>
 			<input [disabled]="(journaledToday | async) == 'true'" placeholder="Today's symptoms... (back pain, nausea, dizziness, etc.)"
+			#conditionInput
+			[formControl]="condCtrl"
+			[matAutocomplete]="autoCond"
 			[matChipInputFor]="conditionList"
 			[matChipInputSeparatorKeyCodes]="separatorKeysCodes"
 			[matChipInputAddOnBlur]="addOnBlur"
 			(matChipInputTokenEnd)="addConditionChip($event)">
 		</mat-chip-list>
+		<mat-autocomplete #autoCond="matAutocomplete" (optionSelected)="selectedCond($event)">
+			<mat-option *ngFor="let condition of filteredConditions | async" [value]="condition">
+				{{ condition }}
+			</mat-option>
+		</mat-autocomplete>
 	</mat-form-field>
 </div>
 <div class="button-container">
@@ -103,16 +119,16 @@
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 		<div class="view-group">
-			<div *ngFor="let item of (journalData | async) | keyvalue" class="data-list">
-				<div class="condition-card">
-					<h3>{{item.key}}:</h3>
+			<div *ngFor="let condition of (journalData | async) | keyvalue" class="data-list">
+				<div class="data-heading">
+					{{ condition.key }}:
 				</div>
-				<div *ngFor="let thing of item.value | keyvalue">
-					<div *ngIf="thing.value >= 0.25" [ngStyle]="{'background-color': 'rgba(255,0,0,'+thing.value+')'}" style="color:white">
-						<b>{{thing.key}}</b>
+				<div *ngFor="let event of condition.value | keyvalue" id="">
+					<div *ngIf="event.value >= 0.25" [ngStyle]="{'background-color': 'rgba(242, 17, 88,'+event.value+')'}" class="data-item">
+						{{ event.key }}
 					</div>
-					<div *ngIf="thing.value <= -0.25" [ngStyle]="{'background-color': 'rgba(0,255,0,'+(thing.value+(-thing.value*2))+')'}" style="color:white">
-						<b>{{thing.key}}</b>
+					<div *ngIf="event.value <= -0.25" [ngStyle]="{'background-color': 'rgba(17, 242, 167,'+(event.value+(-event.value*2))+')'}" class="data-item">
+						{{ event.key }}
 					</div>
 				</div>
 			</div>

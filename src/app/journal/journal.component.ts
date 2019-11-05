@@ -23,7 +23,7 @@ export class JournalComponent implements OnInit {
   private submissionStatus: Observable<boolean>;
   private lastJournaled: Observable<Date>;
   private journaledToday: Observable<string>;
-  private faPencilAlt = faBook;
+  private faBook = faBook;
   private visible = true;
   private selectable = true;
   private removable = true;
@@ -31,6 +31,8 @@ export class JournalComponent implements OnInit {
   readonly separatorKeysCodes: number[] = [ENTER, COMMA];
   private formEvents: string[] = [];
   private formConditions: string[] = [];
+  public renderedConditions: string[] = [];
+  public renderedEvents: string[] = [];
   private myEvents: Observable<string[]>;
   private myConditions: Observable<string[]>;
   private myDoc: Observable<any>;
@@ -38,35 +40,69 @@ export class JournalComponent implements OnInit {
   private viewOpenState = false;
   private journalData: Observable<any>;
   private conditionData = new Subject<any>();
+  condCtrl = new FormControl();
+  filteredConditions: Observable<string[]>;
+  eventCtrl = new FormControl();
+  filteredEvents: Observable<string[]>;
+
+  @ViewChild('eventInput', {static: false}) eventInput: ElementRef<HTMLInputElement>;
+  @ViewChild('autoEvent', {static: false}) eventAutocomplete: MatAutocomplete;
+  @ViewChild('conditionInput', {static: false}) conditionInput: ElementRef<HTMLInputElement>;
+  @ViewChild('autoCond', {static: false}) condAutocomplete: MatAutocomplete;
 
   constructor(
     private authService: AuthenticateService,
     private journalService: JournalService) {
     this.journalService.getUserDoc();
+    this.journalService.getMyConditions().subscribe(conditions => this.renderedConditions = conditions);
+    this.filteredConditions = this.condCtrl.valueChanges.pipe(
+      startWith(null),
+      map((condition: string | null) => condition ? this._filterConditions(condition) : this.renderedConditions.slice()));
+    this.journalService.getMyEvents().subscribe(events => this.renderedEvents = events);
+    this.filteredEvents = this.eventCtrl.valueChanges.pipe(
+      startWith(null),
+      map((event: string | null) => event ? this._filterEvents(event) : this.renderedEvents.slice()));
   }
 
   addEventChip(event: MatChipInputEvent): void {
-    const input = event.input;
-    const value = event.value;
+    // Add fruit only when MatAutocomplete is not open
+    // To make sure this does not conflict with OptionSelected Event
+    if (!this.eventAutocomplete.isOpen) {
+      const input = event.input;
+      const value = event.value;
 
-    if ((value || '').trim()) {
-      this.formEvents.push(value.trim());
-    }
+      // Add our fruit
+      if ((value || '').trim()) {
+        this.formEvents.push(value.trim());
+      }
 
-    if (input) {
-      input.value = '';
+      // Reset the input value
+      if (input) {
+        input.value = '';
+      }
+
+      this.eventCtrl.setValue(null);
     }
   }
 
   addConditionChip(event: MatChipInputEvent): void {
-    const input = event.input;
-    const value = event.value;
+    // Add fruit only when MatAutocomplete is not open
+    // To make sure this does not conflict with OptionSelected Event
+    if (!this.condAutocomplete.isOpen) {
+      const input = event.input;
+      const value = event.value;
 
-    if ((value || '').trim()) {
-      this.formConditions.push(value.trim());
-    }
-    if (input) {
-      input.value = '';
+      // Add our fruit
+      if ((value || '').trim()) {
+        this.formConditions.push(value.trim());
+      }
+
+      // Reset the input value
+      if (input) {
+        input.value = '';
+      }
+
+      this.condCtrl.setValue(null);
     }
   }
 
@@ -84,6 +120,32 @@ export class JournalComponent implements OnInit {
     }
   }
 
+  selectedEvent(event: MatAutocompleteSelectedEvent): void {
+    console.log(event)
+    this.formEvents.push(event.option.viewValue);
+    this.eventInput.nativeElement.value = '';
+    this.eventCtrl.setValue(null);
+  }
+
+  selectedCond(event: MatAutocompleteSelectedEvent): void {
+    console.log(event)
+    this.formConditions.push(event.option.viewValue);
+    this.conditionInput.nativeElement.value = '';
+    this.condCtrl.setValue(null);
+  }
+
+  private _filterEvents(value: string): string[] {
+    const filterValue = value.toLowerCase();
+
+    return this.renderedEvents.filter(event => event.toLowerCase().indexOf(filterValue) === 0);
+  }
+
+  private _filterConditions(value: string): string[] {
+    const filterValue = value.toLowerCase();
+
+    return this.renderedConditions.filter(condition => condition.toLowerCase().indexOf(filterValue) === 0);
+  }
+
   createEntry() {
     let date = Date.now();
     this.entry = {
@@ -98,10 +160,6 @@ export class JournalComponent implements OnInit {
         this.formConditions = null;
       }
     })
-  }
-
-  getKeys(obj){
-    return Object.keys(obj)
   }
 
   getConditionData(condition: string) {
