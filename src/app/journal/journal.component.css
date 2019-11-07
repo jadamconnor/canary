@@ -30,6 +30,25 @@
 	margin: 0 50px;
 }
 
+#days-event {
+
+}
+
+.days-entry-subheading {
+	width: 100%;
+	margin: 10px 0;
+}
+
+#days-events-list, #days-conditions-list {
+}
+
+::ng-deep .mat-chip-list-wrapper {
+	margin-right: 5px !important;
+}
+
+.days-event {
+}
+
 #journal-entry-container, #journal-view-container {
 	margin: 5px 50px 0px;
 	width: calc(100% - 100px);
@@ -65,7 +84,7 @@
 }
 
 .data-heading {
-	font-size: 20px;
+	font-size: 15px;
 	font-weight: 500;
 	margin: 5px 0;
 }
@@ -74,7 +93,6 @@
 }
 
 .data-item {
-	font-size: 15px;
 	height: 30px;
 	padding-top: 10px;
 	text-align: center;

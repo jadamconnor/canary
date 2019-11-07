@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { FormControl } from '@angular/forms';
 import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from '@angular/fire/firestore';
-import { Observable, Subject, from } from 'rxjs';
+import { Observable, Subject, from, interval } from 'rxjs';
 import { Entry } from '../entry';
 import { AuthenticateService } from '../authentication/authenticate.service';
 import { JournalService } from './journal.service';
@@ -19,7 +19,10 @@ import { faBook } from '@fortawesome/free-solid-svg-icons';
 })
 export class JournalComponent implements OnInit {
 
+  public now: string = new Date().toDateString();
   private entry: Entry;
+  private daysEvents: Observable<string[]>;
+  private daysConditions: Observable<string[]>;
   private submissionStatus: Observable<boolean>;
   private lastJournaled: Observable<Date>;
   private journaledToday: Observable<string>;
@@ -35,10 +38,10 @@ export class JournalComponent implements OnInit {
   public renderedEvents: string[] = [];
   private myEvents: Observable<string[]>;
   private myConditions: Observable<string[]>;
-  private myDoc: Observable<any>;
   private entryOpenState = false;
   private viewOpenState = false;
   private journalData: Observable<any>;
+  private entryCount: Observable<number>;
   private conditionData = new Subject<any>();
   condCtrl = new FormControl();
   filteredConditions: Observable<string[]>;
@@ -53,7 +56,6 @@ export class JournalComponent implements OnInit {
   constructor(
     private authService: AuthenticateService,
     private journalService: JournalService) {
-    this.journalService.getUserDoc();
     this.journalService.getMyConditions().subscribe(conditions => this.renderedConditions = conditions);
     this.filteredConditions = this.condCtrl.valueChanges.pipe(
       startWith(null),
@@ -64,44 +66,36 @@ export class JournalComponent implements OnInit {
       map((event: string | null) => event ? this._filterEvents(event) : this.renderedEvents.slice()));
   }
 
+  getDate() {
+    let now = Date.now();
+    const timer = interval(1000);
+    return timer.pipe(
+      map(now => console.log(now)))
+  }
+
   addEventChip(event: MatChipInputEvent): void {
-    // Add fruit only when MatAutocomplete is not open
-    // To make sure this does not conflict with OptionSelected Event
     if (!this.eventAutocomplete.isOpen) {
       const input = event.input;
       const value = event.value;
-
-      // Add our fruit
       if ((value || '').trim()) {
         this.formEvents.push(value.trim());
       }
-
-      // Reset the input value
       if (input) {
         input.value = '';
-      }
-
-      this.eventCtrl.setValue(null);
+      } this.eventCtrl.setValue(null);
     }
   }
 
   addConditionChip(event: MatChipInputEvent): void {
-    // Add fruit only when MatAutocomplete is not open
-    // To make sure this does not conflict with OptionSelected Event
     if (!this.condAutocomplete.isOpen) {
       const input = event.input;
       const value = event.value;
-
-      // Add our fruit
       if ((value || '').trim()) {
         this.formConditions.push(value.trim());
       }
-
-      // Reset the input value
       if (input) {
         input.value = '';
       }
-
       this.condCtrl.setValue(null);
     }
   }
@@ -120,15 +114,21 @@ export class JournalComponent implements OnInit {
     }
   }
 
+  removeDaysEvent(event: string) {
+    this.journalService.editDaysEvents(event);
+  }
+
+  removeDaysCondition(condition: string) {
+    this.journalService.editDaysConditions(condition);
+  }
+
   selectedEvent(event: MatAutocompleteSelectedEvent): void {
-    console.log(event)
     this.formEvents.push(event.option.viewValue);
     this.eventInput.nativeElement.value = '';
     this.eventCtrl.setValue(null);
   }
 
   selectedCond(event: MatAutocompleteSelectedEvent): void {
-    console.log(event)
     this.formConditions.push(event.option.viewValue);
     this.conditionInput.nativeElement.value = '';
     this.condCtrl.setValue(null);
@@ -146,18 +146,19 @@ export class JournalComponent implements OnInit {
     return this.renderedConditions.filter(condition => condition.toLowerCase().indexOf(filterValue) === 0);
   }
 
-  createEntry() {
-    let date = Date.now();
+  submitJournal() {
+    let now = Date.now();
     this.entry = {
-      date: date,
+      date: now,
       events: this.formEvents,
       conditions: this.formConditions
     };
-    this.submissionStatus = this.journalService.createEntry(this.entry);
+    this.journalService.submitJournal(this.entry);
+    this.submissionStatus = this.journalService.submitStatus;
     this.submissionStatus.subscribe(status => {
       if (status === true) {
-        this.formEvents = null;
-        this.formConditions = null;
+        this.formEvents = [];
+        this.formConditions = [];
       }
     })
   }
@@ -165,14 +166,8 @@ export class JournalComponent implements OnInit {
   getConditionData(condition: string) {
     this.journalService.getConditionData(condition)
     .subscribe(data => {
-      console.log(data)
       this.conditionData.next(data);
     });
-  }
-
-  getCorrelation(event: string, condition: string): Observable<number> {
-    this.journalService.getPhiCo(event, condition).subscribe(data => console.log(data))
-    return this.journalService.getPhiCo(event, condition);
   }
 
   signOut() {
@@ -180,11 +175,14 @@ export class JournalComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.myDoc = this.journalService.userFields;
     this.journaledToday = this.journalService.journaledToday();
     this.myConditions = this.journalService.getMyConditions();
     this.myEvents = this.journalService.getMyEvents();
     this.journalData = this.journalService.formJournalData();
+    this.daysEvents = this.journalService.getDaysEvents();
+    this.daysConditions = this.journalService.getDaysConditions();
+    this.journalService.setEntryCount();
+    this.entryCount = this.journalService.entryCount;
   }
 
 }
