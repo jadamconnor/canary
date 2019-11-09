@@ -53,49 +53,6 @@ export class JournalService {
 		});
 	}
 
-	updateEntry(uid: string, entry: Entry, e: Entry) {
-		if (entry.conditions.length > 0 && entry.events.length > 0) {
-			this.db.collection(`users`).doc(`${uid}/entries/${e.date}`).update({
-				events: firebase.firestore.FieldValue.arrayUnion(...entry.events),
-				conditions: firebase.firestore.FieldValue.arrayUnion(...entry.conditions)
-			})
-			.then(docRef => {
-				this.submitStatus.next(true);
-				console.log('Document updated.');
-			})
-			.catch(error => {
-				this.submitStatus.next(false);
-				alert(`Error adding document: ${error}`);
-			});
-		} else {
-			if (entry.conditions.length > 0 && entry.events.length ===  0) {
-				this.db.collection(`users`).doc(`${uid}/entries/${e.date}`).update({
-					conditions: firebase.firestore.FieldValue.arrayUnion(...entry.conditions)
-				})
-				.then(docRef => {
-					this.submitStatus.next(true);
-					console.log('Document updated.');
-				})
-				.catch(error => {
-					this.submitStatus.next(false);
-					alert(`Error adding document: ${error}`);
-				});
-			} else if (entry.conditions.length === 0 && entry.events.length >  0) {
-				this.db.collection(`users`).doc(`${uid}/entries/${e.date}`).update({
-					events: firebase.firestore.FieldValue.arrayUnion(...entry.events)
-				})
-				.then(docRef => {
-					this.submitStatus.next(true);
-					console.log('Document updated.');
-				})
-				.catch(error => {
-					this.submitStatus.next(false);
-					alert(`Error adding document: ${error}`);
-				});
-			}
-		}
-	}
-
 	updateUserTables(uid: string, entry: Entry) {
 		if (entry.conditions.length > 0 && entry.events.length > 0) {
 			this.db.doc(`users/${uid}`).update({
@@ -154,7 +111,7 @@ export class JournalService {
 		});
 	}
 
-	submitJournal(entry: Entry) {
+	submitEntry(entry: Entry) {
 		let newDay = true;
 		this.user.subscribe(user => {
 			this.userDoc.valueChanges().subscribe(data => {
@@ -172,8 +129,11 @@ export class JournalService {
 					.subscribe(entries => {
 						for (let e of entries) {
 							if (this.isToday(e.date)) {
+								let mergedEntry: Entry = e;
+								mergedEntry.events = mergedEntry.events.concat(entry.events);
+								mergedEntry.conditions = mergedEntry.conditions.concat(entry.conditions);
 								newDay = false;
-								this.updateEntry(user.uid, entry, e);
+								this.setEntry(user.uid, mergedEntry);
 							}
 						}
 						if (newDay === true) {

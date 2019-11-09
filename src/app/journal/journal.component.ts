@@ -19,9 +19,11 @@ export class JournalComponent implements OnInit {
 
   public now: string = new Date().toDateString();
   private entry: Entry;
-  private daysEntry: Observable<Entry>;
-  private submissionStatus: Observable<boolean>;
-  private journaledToday: Observable<string>;
+  private daysEntry$: Observable<Entry>;
+  private daysEvents$: Observable<string[]>;
+  private daysConditions$: Observable<string[]>;
+  private submissionStatus$: Observable<boolean>;
+  private journaledToday$: Observable<string>;
   private faBook = faBook;
   private visible = true;
   private selectable = true;
@@ -34,12 +36,12 @@ export class JournalComponent implements OnInit {
   public renderedEvents: string[] = [];
   private entryOpenState = false;
   private viewOpenState = false;
-  private journalData: Observable<any>;
-  private entryCount: Observable<number>;
+  private journalData$: Observable<any>;
+  private entryCount$: Observable<number>;
   condCtrl = new FormControl();
-  filteredConditions: Observable<string[]>;
+  filteredConditions$: Observable<string[]>;
   eventCtrl = new FormControl();
-  filteredEvents: Observable<string[]>;
+  filteredEvents$: Observable<string[]>;
 
   @ViewChild('eventInput', {static: false}) eventInput: ElementRef<HTMLInputElement>;
   @ViewChild('autoEvent', {static: false}) eventAutocomplete: MatAutocomplete;
@@ -48,10 +50,10 @@ export class JournalComponent implements OnInit {
 
   constructor(private authService: AuthenticateService, private journalService: JournalService) {
     this.journalService.getMyConditions().subscribe(conditions => this.renderedConditions = conditions);
-    this.filteredConditions = this.condCtrl.valueChanges
+    this.filteredConditions$ = this.condCtrl.valueChanges
     .pipe(startWith(null),map((condition: string | null) => condition ? this._filterConditions(condition) : this.renderedConditions.slice()));
     this.journalService.getMyEvents().subscribe(events => this.renderedEvents = events);
-    this.filteredEvents = this.eventCtrl.valueChanges
+    this.filteredEvents$ = this.eventCtrl.valueChanges
     .pipe(startWith(null), map((event: string | null) => event ? this._filterEvents(event) : this.renderedEvents.slice()));
   }
 
@@ -123,26 +125,24 @@ export class JournalComponent implements OnInit {
 
   private _filterEvents(value: string): string[] {
     const filterValue = value.toLowerCase();
-
     return this.renderedEvents.filter(event => event.toLowerCase().indexOf(filterValue) === 0);
   }
 
   private _filterConditions(value: string): string[] {
     const filterValue = value.toLowerCase();
-
     return this.renderedConditions.filter(condition => condition.toLowerCase().indexOf(filterValue) === 0);
   }
 
-  submitJournal() {
+  submitEntry() {
     let now = Date.now();
     this.entry = {
       date: now,
       events: this.formEvents,
       conditions: this.formConditions
     };
-    this.journalService.submitJournal(this.entry);
-    this.submissionStatus = this.journalService.submitStatus;
-    this.submissionStatus.subscribe(status => {
+    this.journalService.submitEntry(this.entry);
+    this.submissionStatus$ = this.journalService.submitStatus;
+    this.submissionStatus$.subscribe(status => {
       if (status === true) {
         this.formEvents = [];
         this.formConditions = [];
@@ -156,10 +156,13 @@ export class JournalComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.journaledToday = this.journalService.journaledToday();
-    this.journalData = this.journalService.formJournalData();
-    this.daysEntry = this.journalService.getDaysEntry();
-    this.entryCount = this.journalService.getEntryCount();
+    this.journaledToday$ = this.journalService.journaledToday();
+    this.journaledToday$.subscribe(data => console.log(data))
+    this.journalData$ = this.journalService.formJournalData();
+    this.daysEntry$ = this.journalService.getDaysEntry();
+    this.daysEvents$ = this.daysEntry$.pipe(map(entry => entry[0].events));
+    this.daysConditions$ = this.daysEntry$.pipe(map(entry => entry[0].conditions));
+    this.entryCount$ = this.journalService.getEntryCount();
   }
 
   ngOnDestroy() {

@@ -3,22 +3,22 @@
 		<img src="../assets/canary-v5.png" id="journal-header-image">
 	</div>
 	<div id="journal-header-thought" class="journal-header">
-		<fa-icon *ngIf="(journaledToday | async) == 'new' || (journaledToday | async) == 'false'" [icon]="faBook"></fa-icon>
-		<b *ngIf="(journaledToday | async) == 'true'">φ</b>
+		<fa-icon *ngIf="(journaledToday$ | async) == 'new' || (journaledToday$ | async) == 'false'" [icon]="faBook"></fa-icon>
+		<b *ngIf="(journaledToday$ | async) == 'true'">φ</b>
 	</div>
 	<div id="journal-header-copy" class="journal-header">
 	</div>
 </div>
 <mat-card id="journal-entry-card" class="journal-card">
-	<mat-card-header  *ngIf="(journaledToday | async) == 'new'" id="journal-card-header">
+	<mat-card-header  *ngIf="(journaledToday$ | async) == 'new'" id="journal-card-header">
 		<mat-card-title>This is your journal.</mat-card-title>
 		<mat-card-subtitle>List all of the day's significant <b>events</b> and any <b>symptoms</b> you experienced in the <b>Journal Entry</b> section below. Since this is your first time, you should also read the <b>guide</b>.</mat-card-subtitle>
 	</mat-card-header>
-	<mat-card-header  *ngIf="(journaledToday | async) == 'false'" id="journal-card-header">
+	<mat-card-header  *ngIf="(journaledToday$ | async) == 'false'" id="journal-card-header">
 		<mat-card-title>You haven't journaled today.</mat-card-title>
 		<mat-card-subtitle>List all of the day's significant <b>events</b> and any <b>symptoms</b> you experienced in the <b>Journal Entry</b> section below.</mat-card-subtitle>
 	</mat-card-header>
-	<mat-card-header  *ngIf="(journaledToday | async) == 'true'" id="journal-card-header">
+	<mat-card-header  *ngIf="(journaledToday$ | async) == 'true'" id="journal-card-header">
 		<mat-card-title>Add to the day's journal entry.</mat-card-title>
 		<mat-card-subtitle>You've journaled today, but you can always add to it. If there's enough data, it will be presented in the <b>Journal View</b> section.</mat-card-subtitle>
 	</mat-card-header>
@@ -28,33 +28,33 @@
 <div id="journal-entry-container">
 	<mat-accordion>
 		<mat-expansion-panel (opened)="entryOpenState = true"
-		(closed)="entryOpenState = false" [expanded]="(journaledToday | async) == 'new' || (journaledToday | async) == 'false' || (entryCount | async) < 15">
+		(closed)="entryOpenState = false" [expanded]="(journaledToday$ | async) == 'new' || (journaledToday$ | async) == 'false' || (entryCount$ | async) < 15">
 		<mat-expansion-panel-header>
 			<mat-panel-title>
 				Journal Entry
 			</mat-panel-title>
-			<mat-panel-description *ngIf="(journaledToday | async) == 'false'">
+			<mat-panel-description *ngIf="(journaledToday$ | async) == 'false'">
 				Enter journal data here.
 			</mat-panel-description>
-			<mat-panel-description *ngIf="(journaledToday | async) == 'true'">
+			<mat-panel-description *ngIf="(journaledToday$ | async) == 'true'">
 				Submit more events/symptoms today to add to the day's entry.
 			</mat-panel-description>
 		</mat-expansion-panel-header>
-		<div *ngFor="let entry of daysEntry | async" id="days-entry">
-			<div *ngIf="entry.events.length" id="days-events-heading" class="days-entry-subheading">
+		<div id="days-entry">
+			<div *ngIf="(daysEvents$ | async)?.length" id="days-events-heading" class="days-entry-subheading">
 				Today's events:
 			</div>
 			<mat-chip-list aria-label="events" id="days-events-list">
-				<mat-chip *ngFor="let event of entry.events" [removable]="removable" (removed)="removeDaysEvent(event)" class="days-event">
+				<mat-chip *ngFor="let event of daysEvents$ | async" [removable]="removable" (removed)="removeDaysEvent(event)" class="days-event">
 					{{ event }}
 					<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
 				</mat-chip>
 			</mat-chip-list>
-			<div *ngIf="entry.conditions.length" id="days-conditions-heading" class="days-entry-subheading">
+			<div *ngIf="(daysConditions$ | async)?.length" id="days-conditions-heading" class="days-entry-subheading">
 				Today's symptoms:
 			</div>
 			<mat-chip-list aria-label="conditions" id="days-conditions-list">
-				<mat-chip  *ngFor="let condition of entry.conditions" [removable]="removable" (removed)="removeDaysCondition(condition)" class="days-condition">
+				<mat-chip  *ngFor="let condition of daysConditions$ | async" [removable]="removable" (removed)="removeDaysCondition(condition)" class="days-condition">
 					{{ condition }}
 					<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
 				</mat-chip>
@@ -78,7 +78,7 @@
 				(matChipInputTokenEnd)="addEventChip($event)">
 			</mat-chip-list>
 			<mat-autocomplete #autoEvent="matAutocomplete" (optionSelected)="selectedEvent($event)">
-				<mat-option *ngFor="let event of filteredEvents | async" [value]="event">
+				<mat-option *ngFor="let event of filteredEvents$ | async" [value]="event">
 					{{ event }}
 				</mat-option>
 			</mat-autocomplete>
@@ -102,7 +102,7 @@
 			(matChipInputTokenEnd)="addConditionChip($event)">
 		</mat-chip-list>
 		<mat-autocomplete #autoCond="matAutocomplete" (optionSelected)="selectedCond($event)">
-			<mat-option *ngFor="let condition of filteredConditions | async" [value]="condition">
+			<mat-option *ngFor="let condition of filteredConditions$ | async" [value]="condition">
 				{{ condition }}
 			</mat-option>
 		</mat-autocomplete>
@@ -115,7 +115,7 @@
 		There was an error while submitting your entry.
 	</div>
 <div class="button-container">
-	<button mat-button *ngIf="formEvents && formConditions" (click)="submitJournal()">SUBMIT</button>
+	<button mat-button *ngIf="formEvents && formConditions" (click)="submitEntry()">SUBMIT</button>
 </div>
 </mat-expansion-panel>
 </mat-accordion>
@@ -123,26 +123,26 @@
 <div id="journal-view-container">
 	<mat-accordion>
 		<mat-expansion-panel (opened)="viewOpenState = true"
-		(closed)="viewOpenState = false" [expanded]="(journaledToday | async) == 'true' && (entryCount | async) >= 15">
+		(closed)="viewOpenState = false" [expanded]="(journaledToday$ | async) == 'true' && (entryCount$ | async) >= 15">
 		<mat-expansion-panel-header>
 			<mat-panel-title>
 				Journal View
 			</mat-panel-title>
-			<mat-panel-description *ngIf="viewOpenState == false && (entryCount | async) >= 15">
+			<mat-panel-description *ngIf="viewOpenState == false && (entryCount$ | async) >= 15">
 				View journal data here.
 			</mat-panel-description>
-			<mat-panel-description *ngIf="viewOpenState == true && (entryCount | async) >= 15">
+			<mat-panel-description *ngIf="viewOpenState == true && (entryCount$ | async) >= 15">
 				Your symptoms
 			</mat-panel-description>
-			<mat-panel-description *ngIf="viewOpenState == false && (entryCount | async) < 15">
+			<mat-panel-description *ngIf="viewOpenState == false && (entryCount$ | async) < 15">
 				No data to show yet
 			</mat-panel-description>
-			<mat-panel-description *ngIf="viewOpenState == true && (entryCount | async) < 15">
+			<mat-panel-description *ngIf="viewOpenState == true && (entryCount$ | async) < 15">
 				No data to show yet
 			</mat-panel-description>
 		</mat-expansion-panel-header>
-		<div *ngIf="(entryCount | async) >= 15" class="view-group">
-			<div *ngFor="let condition of (journalData | async) | keyvalue" class="data-list">
+		<div *ngIf="(entryCount$ | async) >= 15" class="view-group">
+			<div *ngFor="let condition of (journalData$ | async) | keyvalue" class="data-list">
 				<div class="data-heading">
 					{{ condition.key }}:
 				</div>
@@ -156,9 +156,9 @@
 				</div>
 			</div>
 		</div>
-		<div *ngIf="(entryCount | async) < 15" class="view-group">
+		<div *ngIf="(entryCount$ | async) < 15" class="view-group">
 			<div id="check-back">
-				You haven't submitted enough data to display anything useful here. (<b>{{ 15-(entryCount | async) }}</b> entries to go.)
+				You haven't submitted enough data to display anything useful here. (<b>{{ 15-(entryCount$ | async) }}</b> entries to go.)
 			</div>
 		</div>
 	</mat-expansion-panel>
