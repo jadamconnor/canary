@@ -40,21 +40,21 @@
 				Submit more events/symptoms today to add to the day's entry.
 			</mat-panel-description>
 		</mat-expansion-panel-header>
-		<div id="days-entry">
-			<div *ngIf="(daysEvents | async)?.length" id="days-events-heading" class="days-entry-subheading">
+		<div *ngFor="let entry of daysEntry | async" id="days-entry">
+			<div *ngIf="entry.events.length" id="days-events-heading" class="days-entry-subheading">
 				Today's events:
 			</div>
 			<mat-chip-list aria-label="events" id="days-events-list">
-				<mat-chip *ngFor="let event of daysEvents | async" [removable]="removable" (removed)="removeDaysEvent(event)" class="days-event">
+				<mat-chip *ngFor="let event of entry.events" [removable]="removable" (removed)="removeDaysEvent(event)" class="days-event">
 					{{ event }}
 					<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
 				</mat-chip>
 			</mat-chip-list>
-			<div *ngIf="(daysConditions | async)?.length" id="days-conditions-heading" class="days-entry-subheading">
+			<div *ngIf="entry.conditions.length" id="days-conditions-heading" class="days-entry-subheading">
 				Today's symptoms:
 			</div>
 			<mat-chip-list aria-label="conditions" id="days-conditions-list">
-				<mat-chip  *ngFor="let condition of daysConditions | async" [removable]="removable" (removed)="removeDaysCondition(condition)" class="days-condition">
+				<mat-chip  *ngFor="let condition of entry.conditions" [removable]="removable" (removed)="removeDaysCondition(condition)" class="days-condition">
 					{{ condition }}
 					<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
 				</mat-chip>

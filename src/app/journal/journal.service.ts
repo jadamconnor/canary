@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { Observable, Subject } from 'rxjs';
 import { Entry } from '../entry';
 import { AuthenticateService } from '../authentication/authenticate.service';
-import { map, take } from 'rxjs/operators';
+import { count, map, take, tap, filter } from 'rxjs/operators';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
 
-export interface UserDoc { myEntries:Entry[], myEvents: string[], myConditions: string[]};
+export interface UserDoc { myEntries:Entry[], entryCount: number, myEvents: string[], myConditions: string[]};
 
 @Injectable({
 	providedIn: 'root'
@@ -20,12 +19,8 @@ export class JournalService {
 	public userFields: Observable<UserDoc>;
 	public userEntries: Observable<Entry[]>;
 	public submitStatus = new Subject<boolean>();
-	public entryCount = new Subject<number>();
 
-	constructor(
-		private db: AngularFirestore,
-		private afAuth: AngularFireAuth,
-		private authService: AuthenticateService) {
+	constructor(private db: AngularFirestore, authService: AuthenticateService) {
 		this.user = authService.user;
 		this.user.subscribe(user => {
 			this.userDoc = this.db.doc<UserDoc>(`users/${user.uid}`);
@@ -33,40 +28,17 @@ export class JournalService {
 	}
 
 	getEntries(): Observable<any> {
-		return this.userDoc.collection('entries').valueChanges()
+		return this.userDoc.collection('entries').valueChanges();
 	}
 
-	setEntryCount() {
-		let i = 0;
-		this.getEntries().subscribe(entries => {
-			for (let e of entries) {
-				this.entryCount.next(i += 1);
-			}
-		})
+	getEntryCount(): Observable<number> {
+		return this.userDoc.valueChanges()
+		.pipe(map(data => data.entryCount));
 	}
 
-	getDaysEvents(): Observable<string[]> {
-		let daysEvents = new Subject<string[]>();
-		this.getEntries().subscribe(entries => {
-			entries.forEach(entry => {
-				if (this.isToday(entry.date)) {
-					daysEvents.next(entry.events)
-				}
-			});
-		});
-		return daysEvents;
-	}
-
-	getDaysConditions(): Observable<string[]> {
-		let daysConditions = new Subject<string[]>();
-		this.getEntries().subscribe(entries => {
-			entries.forEach(entry => {
-				if (this.isToday(entry.date)) {
-					daysConditions.next(entry.conditions)
-				}
-			});
-		});
-		return daysConditions;
+	getDaysEntry(): Observable<Entry> {
+		return this.getEntries()
+		.pipe(map(entries => entries.filter(entry => this.isToday(entry.date))));
 	}
 
 	setEntry(uid: string, entry: Entry) {
@@ -132,11 +104,11 @@ export class JournalService {
 			})
 			.then(() => {
 				this.submitStatus.next(true);
-				console.log('Successful update() of user tables')
+				console.log('Successful update() of user tables');
 			})
 			.catch(err => {
 				this.submitStatus.next(false);
-				console.log("Something went wrong during update() of user tables: ", err)
+				console.log("Something went wrong during update() of user tables: ", err);
 			});
 		} else {
 			if (entry.conditions.length > 0 && entry.events.length ===  0) {
@@ -145,11 +117,11 @@ export class JournalService {
 				})
 				.then(() => {
 					this.submitStatus.next(true);
-					console.log('Successful update() of user tables')
+					console.log('Successful update() of user tables');
 				})
 				.catch(err => {
 					this.submitStatus.next(false);
-					console.log("Something went wrong during update() of user tables: ", err)
+					console.log("Something went wrong during update() of user tables: ", err);
 				});
 			} else if (entry.conditions.length === 0 && entry.events.length >  0) {
 				this.db.doc(`users/${uid}`).update({
@@ -157,11 +129,11 @@ export class JournalService {
 				})
 				.then(() => {
 					this.submitStatus.next(true);
-					console.log('Successful update() of user tables')
+					console.log('Successful update() of user tables');
 				})
 				.catch(err => {
 					this.submitStatus.next(false);
-					console.log("Something went wrong during update() of user tables: ", err)
+					console.log("Something went wrong during update() of user tables: ", err);
 				});
 			}
 		}
@@ -174,11 +146,11 @@ export class JournalService {
 		})
 		.then(() => {
 			this.submitStatus.next(true);
-			console.log('Successful set() of user tables')
+			console.log('Successful set() of user tables');
 		})
 		.catch(err => {
 			this.submitStatus.next(false);
-			console.log("Something went wrong during set() of user tables: ", err)
+			console.log("Something went wrong during set() of user tables: ", err);
 		});
 	}
 
@@ -195,7 +167,7 @@ export class JournalService {
 			this.db.firestore.doc(`/users/${user.uid}`).get()
 			.then(docSnapshot => {
 				if (docSnapshot.exists) {
-					this.userDoc.collection('entries').valueChanges()
+					this.getEntries()
 					.pipe(take(1))
 					.subscribe(entries => {
 						for (let e of entries) {
@@ -226,7 +198,7 @@ export class JournalService {
 
 	lastJournaled(): Observable<Date> {
 		let lastJournaled = new Subject<Date>();
-		this.userDoc.collection('entries').valueChanges()
+		this.getEntries()
 		.subscribe(data => {
 			lastJournaled.next(data[data.length - 1].date);
 		});
@@ -256,7 +228,7 @@ export class JournalService {
 		let co = new Subject<number>();
 		this.user.subscribe(user => {
 			this.userDoc = this.db.doc<UserDoc>(`users/${user.uid}`);
-			this.userDoc.collection<Entry>('entries').valueChanges()
+			this.getEntries()
 			.subscribe(entries => {
 				for (let entry of entries) {
 					if (!entry.conditions.includes(condition) && !entry.events.includes(event)) {
@@ -270,11 +242,7 @@ export class JournalService {
 					}
 				};
 				let coefficient = (table[3] * table[0] - table[2] * table[1]) /
-				Math.sqrt(
-					(table[2] + table[3]) * 
-					(table[0] + table[1]) * 
-					(table[1] + table[3]) * 
-					(table[0] + table[2]));
+				Math.sqrt((table[2] + table[3]) * (table[0] + table[1]) * (table[1] + table[3]) * (table[0] + table[2]));
 				co.next(coefficient);
 				// Don't forget to reset the table or the function will continue to increment its elements
 				table = [0, 0, 0, 0];
@@ -303,14 +271,6 @@ export class JournalService {
 		return journalData;
 	}
 
-	getConditionData(condition: string): Observable<any> {
-		let cData = new Subject<any>();
-		this.formJournalData().subscribe(data => {
-			cData.next(data[condition]);
-		})
-		return cData;
-	}
-
 	getMyEvents(): Observable<string[]> {
 		let myEvents = new Subject<string[]>();
 		this.user.subscribe(user => {
@@ -327,6 +287,7 @@ export class JournalService {
 		this.user.subscribe(user => {
 			this.db.doc<UserDoc>(`users/${user.uid}`).valueChanges()
 			.subscribe(data => {
+				console.log('getMyConditions')
 				data ? myConditions.next(data.myConditions) : myConditions.next([]);
 			})
 		})
@@ -349,9 +310,9 @@ export class JournalService {
 							return;
 						})
 					}
-				})
-			})
-		})
+				});
+			});
+		});
 	}
 
 	editDaysConditions(condition: string) {
@@ -370,9 +331,9 @@ export class JournalService {
 							return;
 						})
 					}
-				})
-			})
-		})
+				});
+			});
+		});
 	}
 
 }

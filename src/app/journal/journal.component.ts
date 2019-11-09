@@ -1,9 +1,7 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/auth';
 import { FormControl } from '@angular/forms';
-import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from '@angular/fire/firestore';
-import { Observable, Subject, from, interval } from 'rxjs';
+import { Observable, interval } from 'rxjs';
 import { Entry } from '../entry';
 import { AuthenticateService } from '../authentication/authenticate.service';
 import { JournalService } from './journal.service';
@@ -21,10 +19,8 @@ export class JournalComponent implements OnInit {
 
   public now: string = new Date().toDateString();
   private entry: Entry;
-  private daysEvents: Observable<string[]>;
-  private daysConditions: Observable<string[]>;
+  private daysEntry: Observable<Entry>;
   private submissionStatus: Observable<boolean>;
-  private lastJournaled: Observable<Date>;
   private journaledToday: Observable<string>;
   private faBook = faBook;
   private visible = true;
@@ -36,13 +32,10 @@ export class JournalComponent implements OnInit {
   private formConditions: string[] = [];
   public renderedConditions: string[] = [];
   public renderedEvents: string[] = [];
-  private myEvents: Observable<string[]>;
-  private myConditions: Observable<string[]>;
   private entryOpenState = false;
   private viewOpenState = false;
   private journalData: Observable<any>;
   private entryCount: Observable<number>;
-  private conditionData = new Subject<any>();
   condCtrl = new FormControl();
   filteredConditions: Observable<string[]>;
   eventCtrl = new FormControl();
@@ -53,24 +46,18 @@ export class JournalComponent implements OnInit {
   @ViewChild('conditionInput', {static: false}) conditionInput: ElementRef<HTMLInputElement>;
   @ViewChild('autoCond', {static: false}) condAutocomplete: MatAutocomplete;
 
-  constructor(
-    private authService: AuthenticateService,
-    private journalService: JournalService) {
+  constructor(private authService: AuthenticateService, private journalService: JournalService) {
     this.journalService.getMyConditions().subscribe(conditions => this.renderedConditions = conditions);
-    this.filteredConditions = this.condCtrl.valueChanges.pipe(
-      startWith(null),
-      map((condition: string | null) => condition ? this._filterConditions(condition) : this.renderedConditions.slice()));
+    this.filteredConditions = this.condCtrl.valueChanges
+    .pipe(startWith(null),map((condition: string | null) => condition ? this._filterConditions(condition) : this.renderedConditions.slice()));
     this.journalService.getMyEvents().subscribe(events => this.renderedEvents = events);
-    this.filteredEvents = this.eventCtrl.valueChanges.pipe(
-      startWith(null),
-      map((event: string | null) => event ? this._filterEvents(event) : this.renderedEvents.slice()));
+    this.filteredEvents = this.eventCtrl.valueChanges
+    .pipe(startWith(null), map((event: string | null) => event ? this._filterEvents(event) : this.renderedEvents.slice()));
   }
 
   getDate() {
-    let now = Date.now();
     const timer = interval(1000);
-    return timer.pipe(
-      map(now => console.log(now)))
+    return timer.pipe(map(now => console.log(now)));
   }
 
   addEventChip(event: MatChipInputEvent): void {
@@ -163,12 +150,6 @@ export class JournalComponent implements OnInit {
     })
   }
 
-  getConditionData(condition: string) {
-    this.journalService.getConditionData(condition)
-    .subscribe(data => {
-      this.conditionData.next(data);
-    });
-  }
 
   signOut() {
     this.authService.signOut();
@@ -176,13 +157,13 @@ export class JournalComponent implements OnInit {
 
   ngOnInit() {
     this.journaledToday = this.journalService.journaledToday();
-    this.myConditions = this.journalService.getMyConditions();
-    this.myEvents = this.journalService.getMyEvents();
     this.journalData = this.journalService.formJournalData();
-    this.daysEvents = this.journalService.getDaysEvents();
-    this.daysConditions = this.journalService.getDaysConditions();
-    this.journalService.setEntryCount();
-    this.entryCount = this.journalService.entryCount;
+    this.daysEntry = this.journalService.getDaysEntry();
+    this.entryCount = this.journalService.getEntryCount();
+  }
+
+  ngOnDestroy() {
+
   }
 
 }
