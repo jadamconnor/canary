@@ -22,6 +22,7 @@ export class JournalComponent implements OnInit {
   private daysEntry$: Observable<Entry>;
   private daysEvents$: Observable<string[]>;
   private daysConditions$: Observable<string[]>;
+  private daysEntryDate: number;
   private submissionStatus$: Observable<boolean>;
   private journaledToday$: Observable<string>;
   private faBook = faBook;
@@ -60,6 +61,12 @@ export class JournalComponent implements OnInit {
   getDate() {
     const timer = interval(1000);
     return timer.pipe(map(now => console.log(now)));
+  }
+
+  isToday(td) {
+    const today = new Date();
+    const date = new Date(td);
+    return today.toDateString() == date.toDateString();
   }
 
   addEventChip(event: MatChipInputEvent): void {
@@ -104,11 +111,19 @@ export class JournalComponent implements OnInit {
   }
 
   removeDaysEvent(event: string) {
-    this.journalService.editDaysEvents(event);
+    if (this.isToday(this.daysEntryDate)) {
+      this.journalService.editDaysEvents(event);
+    } else {
+      console.log('modal warning that the day is over.');
+    }
   }
 
   removeDaysCondition(condition: string) {
-    this.journalService.editDaysConditions(condition);
+    if (this.isToday(this.daysEntryDate)) {
+      this.journalService.editDaysConditions(condition);
+    } else {
+      console.log('modal warning that the day is over.');
+    }
   }
 
   selectedEvent(event: MatAutocompleteSelectedEvent): void {
@@ -157,9 +172,9 @@ export class JournalComponent implements OnInit {
 
   ngOnInit() {
     this.journaledToday$ = this.journalService.journaledToday().pipe(map(data => data ? data : 'false'));
-    this.journaledToday$.subscribe(data => console.log(data))
     this.journalData$ = this.journalService.formJournalData();
     this.daysEntry$ = this.journalService.getDaysEntry();
+    this.daysEntry$.subscribe(entry => this.daysEntryDate = entry[0].date);
     this.daysEvents$ = this.daysEntry$.pipe(map(entry => entry[0] ? entry[0].events : []));
     this.daysConditions$ = this.daysEntry$.pipe(map(entry => entry[0] ? entry[0].conditions : []));
     this.entryCount$ = this.journalService.getEntryCount();

@@ -245,7 +245,7 @@ export class JournalService {
 				let coefficient = (table[3] * table[0] - table[2] * table[1]) /
 				Math.sqrt((table[2] + table[3]) * (table[0] + table[1]) * (table[1] + table[3]) * (table[0] + table[2]));
 				co.next(coefficient);
-				// Don't forget to reset the table or the function will continue to increment its elements
+				// We reset the table or the function will continue to increment its elements
 				table = [0, 0, 0, 0];
 			});
 		});
@@ -260,7 +260,6 @@ export class JournalService {
 				jData[condition] = {};
 				this.getMyEvents().subscribe(events => {
 					events.forEach(event => {
-						// We should try to only use event-condition combinations that actually occur.
 						this.phi(event, condition).subscribe(data => {
 							jData[condition][event] = data;
 						});

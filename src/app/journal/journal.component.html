@@ -4,8 +4,8 @@
 		<img src="../assets/canary-v5.png" id="journal-header-image">
 	</div>
 	<div id="journal-header-thought" class="journal-header">
-		<fa-icon *ngIf="(journaledToday$ | async) == 'new' || (journaledToday$ | async) == 'false'" [icon]="faBook"></fa-icon>
-		<b *ngIf="(journaledToday$ | async) == 'true'">φ</b>
+		<fa-icon *ngIf="entryOpenState && !viewOpenState" [icon]="faBook"></fa-icon>
+		<b *ngIf="viewOpenState">φ</b>
 	</div>
 	<div id="journal-header-copy" class="journal-header">
 	</div>
@@ -34,7 +34,7 @@
 			<mat-panel-title>
 				Journal Entry
 			</mat-panel-title>
-			<mat-panel-description *ngIf="(journaledToday$ | async) == 'false'">
+			<mat-panel-description *ngIf="(journaledToday$ | async) == 'false' || (journaledToday$ | async) == 'new'">
 				Enter journal data here.
 			</mat-panel-description>
 			<mat-panel-description *ngIf="(journaledToday$ | async) == 'true'">
@@ -124,7 +124,7 @@
 <div id="journal-view-container">
 	<mat-accordion>
 		<mat-expansion-panel (opened)="viewOpenState = true"
-		(closed)="viewOpenState = false" [expanded]="(journaledToday$ | async) == 'true' && (entryCount$ | async) >= 15">
+		(closed)="viewOpenState = false" [expanded]="viewOpenState == true">
 		<mat-expansion-panel-header>
 			<mat-panel-title>
 				Journal View
@@ -158,13 +158,11 @@
 			</div>
 		</div>
 		<div *ngIf="(entryCount$ | async) < 15" class="view-group">
-			<div id="check-back">
-				You haven't submitted enough data to display anything useful here. (<b>{{ 15-(entryCount$ | async) }}</b> entries to go.)
-			</div>
+				There isn't enough data to display anything useful here yet.
 		</div>
 	</mat-expansion-panel>
 </mat-accordion>
 </div>
 <div id="footer">
-	Cnry by J. Adam Connor, v0.0.1 alpha
+	Canary 0.9-b1
 </div>
