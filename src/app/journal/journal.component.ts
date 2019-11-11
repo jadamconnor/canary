@@ -34,7 +34,7 @@ export class JournalComponent implements OnInit {
   private formConditions: string[] = [];
   public renderedConditions: string[] = [];
   public renderedEvents: string[] = [];
-  private entryOpenState = false;
+  private entryOpenState = true;
   private viewOpenState = false;
   private journalData$: Observable<any>;
   private entryCount$: Observable<number>;
@@ -156,12 +156,12 @@ export class JournalComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.journaledToday$ = this.journalService.journaledToday();
+    this.journaledToday$ = this.journalService.journaledToday().pipe(map(data => data ? data : 'false'));
     this.journaledToday$.subscribe(data => console.log(data))
     this.journalData$ = this.journalService.formJournalData();
     this.daysEntry$ = this.journalService.getDaysEntry();
-    this.daysEvents$ = this.daysEntry$.pipe(map(entry => entry[0].events));
-    this.daysConditions$ = this.daysEntry$.pipe(map(entry => entry[0].conditions));
+    this.daysEvents$ = this.daysEntry$.pipe(map(entry => entry[0] ? entry[0].events : []));
+    this.daysConditions$ = this.daysEntry$.pipe(map(entry => entry[0] ? entry[0].conditions : []));
     this.entryCount$ = this.journalService.getEntryCount();
   }
 

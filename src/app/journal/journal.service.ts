@@ -33,7 +33,7 @@ export class JournalService {
 
 	getEntryCount(): Observable<number> {
 		return this.userDoc.valueChanges()
-		.pipe(map(data => data.entryCount));
+		.pipe(map(data => data ? data.entryCount : 0));
 	}
 
 	getDaysEntry(): Observable<Entry> {
@@ -51,6 +51,50 @@ export class JournalService {
 			this.submitStatus.next(false);
 			alert(`Error adding document: ${error}`);
 		});
+	}
+
+	// A cleaner approach may be to pull down the entry and manipulate it client side, then set()
+	updateEntry(uid: string, entry: Entry, e: Entry) {
+		if (entry.conditions.length > 0 && entry.events.length > 0) {
+			this.db.collection(`users`).doc(`${uid}/entries/${e.date}`).update({
+				events: firebase.firestore.FieldValue.arrayUnion(...entry.events),
+				conditions: firebase.firestore.FieldValue.arrayUnion(...entry.conditions)
+			})
+			.then(docRef => {
+				this.submitStatus.next(true);
+				console.log('Document updated.');
+			})
+			.catch(error => {
+				this.submitStatus.next(false);
+				alert(`Error adding document: ${error}`);
+			});
+		} else {
+			if (entry.conditions.length > 0 && entry.events.length ===  0) {
+				this.db.collection(`users`).doc(`${uid}/entries/${e.date}`).update({
+					conditions: firebase.firestore.FieldValue.arrayUnion(...entry.conditions)
+				})
+				.then(docRef => {
+					this.submitStatus.next(true);
+					console.log('Document updated.');
+				})
+				.catch(error => {
+					this.submitStatus.next(false);
+					alert(`Error adding document: ${error}`);
+				});
+			} else if (entry.conditions.length === 0 && entry.events.length >  0) {
+				this.db.collection(`users`).doc(`${uid}/entries/${e.date}`).update({
+					events: firebase.firestore.FieldValue.arrayUnion(...entry.events)
+				})
+				.then(docRef => {
+					this.submitStatus.next(true);
+					console.log('Document updated.');
+				})
+				.catch(error => {
+					this.submitStatus.next(false);
+					alert(`Error adding document: ${error}`);
+				});
+			}
+		}
 	}
 
 	updateUserTables(uid: string, entry: Entry) {
@@ -129,11 +173,8 @@ export class JournalService {
 					.subscribe(entries => {
 						for (let e of entries) {
 							if (this.isToday(e.date)) {
-								let mergedEntry: Entry = e;
-								mergedEntry.events = mergedEntry.events.concat(entry.events);
-								mergedEntry.conditions = mergedEntry.conditions.concat(entry.conditions);
 								newDay = false;
-								this.setEntry(user.uid, mergedEntry);
+								this.updateEntry(user.uid, entry, e);
 							}
 						}
 						if (newDay === true) {
@@ -247,7 +288,6 @@ export class JournalService {
 		this.user.subscribe(user => {
 			this.db.doc<UserDoc>(`users/${user.uid}`).valueChanges()
 			.subscribe(data => {
-				console.log('getMyConditions')
 				data ? myConditions.next(data.myConditions) : myConditions.next([]);
 			})
 		})

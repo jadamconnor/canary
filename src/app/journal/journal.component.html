@@ -1,3 +1,4 @@
+<button mat-button id="sign-out" (click)="signOut()">Sign Out</button>
 <div id="journal-header-container">
 	<div id="journal-header-avatar" class="journal-header">
 		<img src="../assets/canary-v5.png" id="journal-header-image">
@@ -28,7 +29,7 @@
 <div id="journal-entry-container">
 	<mat-accordion>
 		<mat-expansion-panel (opened)="entryOpenState = true"
-		(closed)="entryOpenState = false" [expanded]="(journaledToday$ | async) == 'new' || (journaledToday$ | async) == 'false' || (entryCount$ | async) < 15">
+		(closed)="entryOpenState = false" [expanded]="entryOpenState == true">
 		<mat-expansion-panel-header>
 			<mat-panel-title>
 				Journal Entry
@@ -108,12 +109,12 @@
 		</mat-autocomplete>
 	</mat-form-field>
 </div>
-	<div *ngIf="(submissionStatus | async) == true" id="entry-success">
-		Entry successfully submitted.
-	</div>
-	<div *ngIf="(submissionStatus | async) == false" id="entry-fail">
-		There was an error while submitting your entry.
-	</div>
+<div *ngIf="(submissionStatus | async) == true" id="entry-success">
+	Entry successfully submitted.
+</div>
+<div *ngIf="(submissionStatus | async) == false" id="entry-fail">
+	There was an error while submitting your entry.
+</div>
 <div class="button-container">
 	<button mat-button *ngIf="formEvents && formConditions" (click)="submitEntry()">SUBMIT</button>
 </div>
@@ -163,4 +164,7 @@
 		</div>
 	</mat-expansion-panel>
 </mat-accordion>
+</div>
+<div id="footer">
+	Cnry by J. Adam Connor, v0.0.1 alpha
 </div>
