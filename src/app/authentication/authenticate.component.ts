@@ -12,8 +12,8 @@ import { MatDialog, MatDialogConfig } from "@angular/material";
 })
 export class AuthenticateComponent implements OnInit {
 
-	private email: string;
-	private password: string;
+	public email: string;
+	public password: string;
 
 	constructor(
 		public afAuth: AngularFireAuth,
