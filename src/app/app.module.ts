@@ -24,6 +24,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { GuideDialogComponent } from './journal/guide-dialog/guide-dialog.component';
 
 
 @NgModule({
@@ -31,7 +32,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
     AppComponent,
     JournalComponent,
     AuthenticateComponent,
-    AuthDialogComponent
+    AuthDialogComponent,
+    GuideDialogComponent
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase, 'Canary'),
@@ -57,6 +59,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
   ],
   providers: [AuthenticateService],
   bootstrap: [AppComponent],
-  entryComponents: [AuthDialogComponent]
+  entryComponents: [AuthDialogComponent, GuideDialogComponent]
 })
 export class AppModule { }

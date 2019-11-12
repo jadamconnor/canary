@@ -22,6 +22,17 @@
 	flex-grow: 1;
 }
 
+#help {
+	color: gray;
+	position: absolute;
+	right: 16px;
+	cursor: pointer;
+}
+
+#about {
+	cursor: pointer;
+}
+
 .journaled {
 	display: none;
 }

@@ -1,0 +1,35 @@
+<mat-icon id="close-guide-dialog" (click)="closeDialog()">cancel</mat-icon>
+<h2 mat-dialog-title>About This App</h2>
+
+<mat-dialog-content>
+  <div class="about-q">
+    What is this?
+  </div>
+  <div class="about-a">
+    This is Canary, an app that uses a mathematical formula known as <a href="https://en.wikipedia.org/wiki/Phi_coefficient" target="_blank">phi coefficient</a>
+    to determine whether specific symptoms are correlated to specific events.
+  </div>
+  <div class="about-q">
+    How should I use Canary?
+  </div>
+  <div class="about-a">
+    Each day you should input the day's events and symptoms in the corresponding fields. You should use short terms for each.
+    There's no limit on length of terms, but you must always use the same term for each. Canary's logic correlates terms, so short, memorable terms are best.
+    Don't worry, Canary features autocomplete, which will help you keep terms consistent.
+  </div>
+  <div class="about-q">
+    Then what?
+  </div>
+  <div class="about-a">
+    Once Canary has collected enough data, data will be displayed in the Data View section. If a given event is found to correlate with a given symptom it will
+    be displayed below the symptom. Events shown in red are positively correlated, meaning they occur together. Events shown in green are negatively correlated,
+    meaning they tend to be mutually exclusive.
+  </div>
+  <div class="about-q">
+    Anything else?
+  </div>
+  <div class="about-a">
+    It should be said that correlation does not demonstrate causality. That certain events correlate with certain symptoms does not prove the former causes
+    the latter. However, correlation is an important step in identifying causality. In that way, Canary can be a helpful tool.
+  </div>
+</mat-dialog-content>

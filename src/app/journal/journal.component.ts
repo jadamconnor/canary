@@ -1,14 +1,16 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Observable, interval } from 'rxjs';
+import { Observable, interval, Subject, of, from } from 'rxjs';
 import { Entry } from '../entry';
 import { AuthenticateService } from '../authentication/authenticate.service';
 import { JournalService } from './journal.service';
 import { MatAutocompleteSelectedEvent, MatAutocomplete } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { map, startWith } from 'rxjs/operators';
-import { faBook } from '@fortawesome/free-solid-svg-icons';
+import { faBook, faQuestion, faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import { GuideDialogComponent } from './guide-dialog/guide-dialog.component';
+import { MatDialog, MatDialogConfig } from "@angular/material";
 
 @Component({
   selector: 'app-journal',
@@ -22,10 +24,12 @@ export class JournalComponent implements OnInit {
   private daysEntry$: Observable<Entry>;
   private daysEvents$: Observable<string[]>;
   private daysConditions$: Observable<string[]>;
+  private expiredEvent: boolean = false;
   private daysEntryDate: number;
   private submissionStatus$: Observable<boolean>;
   private journaledToday$: Observable<string>;
   private faBook = faBook;
+  private faQuestion = faQuestionCircle;
   private visible = true;
   private selectable = true;
   private removable = true;
@@ -49,7 +53,10 @@ export class JournalComponent implements OnInit {
   @ViewChild('conditionInput', {static: false}) conditionInput: ElementRef<HTMLInputElement>;
   @ViewChild('autoCond', {static: false}) condAutocomplete: MatAutocomplete;
 
-  constructor(private authService: AuthenticateService, private journalService: JournalService) {
+  constructor(
+    private authService: AuthenticateService,
+    private journalService: JournalService,
+		private dialog: MatDialog) {
     this.journalService.getMyConditions().subscribe(conditions => this.renderedConditions = conditions);
     this.filteredConditions$ = this.condCtrl.valueChanges
     .pipe(startWith(null),map((condition: string | null) => condition ? this._filterConditions(condition) : this.renderedConditions.slice()));
@@ -68,6 +75,11 @@ export class JournalComponent implements OnInit {
     const date = new Date(td);
     return today.toDateString() == date.toDateString();
   }
+
+  guideDialog() {
+		const dialogConfig = new MatDialogConfig();
+    this.dialog.open(GuideDialogComponent, dialogConfig);
+	}
 
   addEventChip(event: MatChipInputEvent): void {
     if (!this.eventAutocomplete.isOpen) {
@@ -114,6 +126,7 @@ export class JournalComponent implements OnInit {
     if (this.isToday(this.daysEntryDate)) {
       this.journalService.editDaysEvents(event);
     } else {
+      this.signOut();
       console.log('modal warning that the day is over.');
     }
   }
@@ -122,6 +135,7 @@ export class JournalComponent implements OnInit {
     if (this.isToday(this.daysEntryDate)) {
       this.journalService.editDaysConditions(condition);
     } else {
+      this.signOut();
       console.log('modal warning that the day is over.');
     }
   }
@@ -174,7 +188,11 @@ export class JournalComponent implements OnInit {
     this.journaledToday$ = this.journalService.journaledToday().pipe(map(data => data ? data : 'false'));
     this.journalData$ = this.journalService.formJournalData();
     this.daysEntry$ = this.journalService.getDaysEntry();
-    this.daysEntry$.subscribe(entry => this.daysEntryDate = entry[0].date);
+    this.daysEntry$.subscribe(entry => {
+      if (entry[0]) {
+        this.daysEntryDate = entry[0].date;
+      }
+    });
     this.daysEvents$ = this.daysEntry$.pipe(map(entry => entry[0] ? entry[0].events : []));
     this.daysConditions$ = this.daysEntry$.pipe(map(entry => entry[0] ? entry[0].conditions : []));
     this.entryCount$ = this.journalService.getEntryCount();

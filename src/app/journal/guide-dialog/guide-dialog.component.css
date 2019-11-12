@@ -1,0 +1,26 @@
+#close-guide-dialog {
+  color: gray;
+  float: right;
+  cursor: pointer;
+}
+
+a {
+  font-weight: bold;
+  color: #000;
+  outline: none;
+  text-decoration: none;
+}
+
+.about-q {
+  font-weight: 400;
+  margin-bottom: 5px;
+}
+
+.about-a {
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+#guide-dialog-buttons {
+  text-align: center;
+}

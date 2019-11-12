@@ -22,10 +22,10 @@ export class AuthenticateService {
 	authenticate(email: string, password: string): Observable<string> {
 		let status = new Subject<string>();
 
-		this.afAuth.auth.signInWithEmailAndPassword(email, password)		
+		this.afAuth.auth.signInWithEmailAndPassword(email, password)
 		.then(() => {
 			status.next('success');
-			this.isAuth = true;	
+			this.isAuth = true;
 		})
 		.catch(error => {
 			if (error.code == 'auth/user-not-found') {
@@ -42,19 +42,17 @@ export class AuthenticateService {
 
 	createAccount(email: string, password: string): Observable<boolean> {
 		let success = new Subject<boolean>();
-
-		this.afAuth.auth.createUserWithEmailAndPassword(email, password)        
+		this.afAuth.auth.createUserWithEmailAndPassword(email, password)
 		.then(() => {
 			console.log('Account creation successful.');
 			success.next(true);
-			this.isAuth = true;	
+			this.isAuth = true;
 		})
 		.catch(error => {
 			var errorMessage = error.message;
 			console.log(errorMessage);
 			success.next(false);
 		})
-
 		return success;
 	}
 

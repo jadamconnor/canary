@@ -14,11 +14,11 @@ export class AuthenticateComponent implements OnInit {
 
 	private email: string;
 	private password: string;
-	
+
 	constructor(
 		public afAuth: AngularFireAuth,
 		public authService: AuthenticateService,
-		public router: Router,		
+		public router: Router,
 		private dialog: MatDialog) {}
 
 	newAccountDialog() {
@@ -33,11 +33,11 @@ export class AuthenticateComponent implements OnInit {
 	authenticate() {
 		this.authService.authenticate(this.email, this.password)
 		.subscribe(status => {
-			if (status === 'success') {				
+			if (status === 'success') {
 				console.log('You are now authenticated.');
 				this.router.navigate(['journal']);
 			} else if (status === 'new') {
-				this.newAccountDialog();				
+				this.newAccountDialog();
 			} else if (status === 'invalid') {
 				alert('It looks like your credentials were wrong.');
 			} else {

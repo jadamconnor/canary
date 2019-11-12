@@ -12,14 +12,17 @@
 </div>
 <mat-card id="journal-entry-card" class="journal-card">
 	<mat-card-header  *ngIf="(journaledToday$ | async) == 'new'" id="journal-card-header">
+		<fa-icon [icon]="faQuestion" id="help" (click)="guideDialog()"></fa-icon>
 		<mat-card-title>This is your journal.</mat-card-title>
-		<mat-card-subtitle>List all of the day's significant <b>events</b> and any <b>symptoms</b> you experienced in the <b>Journal Entry</b> section below. Since this is your first time, you should also read the <b>guide</b>.</mat-card-subtitle>
+		<mat-card-subtitle>List all of the day's significant <b>events</b> and any <b>symptoms</b> you experienced in the <b>Journal Entry</b> section below. Since this is your first time, you should also read <b id="about" (click)="guideDialog()">about</b> this app.</mat-card-subtitle>
 	</mat-card-header>
 	<mat-card-header  *ngIf="(journaledToday$ | async) == 'false'" id="journal-card-header">
+		<fa-icon [icon]="faQuestion" id="help" (click)="guideDialog()"></fa-icon>
 		<mat-card-title>You haven't journaled today.</mat-card-title>
 		<mat-card-subtitle>List all of the day's significant <b>events</b> and any <b>symptoms</b> you experienced in the <b>Journal Entry</b> section below.</mat-card-subtitle>
 	</mat-card-header>
 	<mat-card-header  *ngIf="(journaledToday$ | async) == 'true'" id="journal-card-header">
+		<fa-icon [icon]="faQuestion" id="help" (click)="guideDialog()"></fa-icon>
 		<mat-card-title>Add to the day's journal entry.</mat-card-title>
 		<mat-card-subtitle>You've journaled today, but you can always add to it. If there's enough data, it will be presented in the <b>Journal View</b> section.</mat-card-subtitle>
 	</mat-card-header>
@@ -164,5 +167,6 @@
 </mat-accordion>
 </div>
 <div id="footer">
-	Canary 0.9-b1
+	<div (click)="guideDialog()">
+	Canary 0.9-b2
 </div>
