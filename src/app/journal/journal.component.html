@@ -112,10 +112,10 @@
 		</mat-autocomplete>
 	</mat-form-field>
 </div>
-<div *ngIf="(submissionStatus | async) == true" id="entry-success">
+<div *ngIf="(submissionStatus$ | async) == true" id="entry-success">
 	Entry successfully submitted.
 </div>
-<div *ngIf="(submissionStatus | async) == false" id="entry-fail">
+<div *ngIf="(submissionStatus$ | async) == false" id="entry-fail">
 	There was an error while submitting your entry.
 </div>
 <div class="button-container">

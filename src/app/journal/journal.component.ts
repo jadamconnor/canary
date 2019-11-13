@@ -22,7 +22,7 @@ export class JournalComponent implements OnInit {
   public now: string = new Date().toDateString();
   public entry: Entry;
   public daysEntry$: Observable<Entry>;
-  private daysEvents$: Observable<string[]>;
+  public daysEvents$: Observable<string[]>;
   public daysConditions$: Observable<string[]>;
   private expiredEvent: boolean = false;
   private daysEntryDate: number;
