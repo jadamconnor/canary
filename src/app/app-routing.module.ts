@@ -8,7 +8,7 @@ import { AuthenticateGuard } from './authentication/authenticate.guard';
 const routes: Routes = [
 	{ path: 'journal', canActivate: [AuthenticateGuard], component: JournalComponent },
 	{ path: 'authenticate', component: AuthenticateComponent },
-	{ path: '',   redirectTo: '/journal', pathMatch: 'full' }
+	{ path: '',   redirectTo: '/authenticate', pathMatch: 'full' }
 ];
 
 @NgModule({

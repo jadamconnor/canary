@@ -1,14 +1,14 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Observable, interval, Subject, of, from } from 'rxjs';
+import { Observable, interval } from 'rxjs';
 import { Entry } from '../entry';
 import { AuthenticateService } from '../authentication/authenticate.service';
 import { JournalService } from './journal.service';
 import { MatAutocompleteSelectedEvent, MatAutocomplete } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { map, startWith } from 'rxjs/operators';
-import { faBook, faQuestion, faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import { faBook, faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 import { GuideDialogComponent } from './guide-dialog/guide-dialog.component';
 import { MatDialog, MatDialogConfig } from "@angular/material";
 
@@ -24,7 +24,6 @@ export class JournalComponent implements OnInit {
   public daysEntry$: Observable<Entry>;
   public daysEvents$: Observable<string[]>;
   public daysConditions$: Observable<string[]>;
-  private expiredEvent: boolean = false;
   private daysEntryDate: number;
   public submissionStatus$: Observable<boolean>;
   public journaledToday$: Observable<string>;
