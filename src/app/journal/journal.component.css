@@ -124,3 +124,34 @@
 	margin: 5px 50px 0px;
 	padding-top: 25px;
 }
+
+
+@media only screen and (max-width: 600px) {
+	#journal-header-avatar {
+		width: 75px;
+	}
+	#journal-header-thought {
+		font-size: 20px;
+	}
+	#journal-header-container {
+		width: 100vw;
+		display: inline-flex;
+		margin: 5px 0 0;
+	}
+	.journal-card {
+		margin: 0;
+	}
+	#journal-entry-container, #journal-view-container {
+		margin: 5px 0px 0px;
+		width: 100vw;
+	}
+	#sign-out {
+		right: 5px;
+	}
+	.card-description {
+		display: none;
+	}
+	#footer {width: calc(100% - 32px);
+		margin: 5px 16px 0px;
+	}
+}

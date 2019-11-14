@@ -37,10 +37,10 @@
 			<mat-panel-title>
 				Journal Entry
 			</mat-panel-title>
-			<mat-panel-description *ngIf="(journaledToday$ | async) == 'false' || (journaledToday$ | async) == 'new'">
+			<mat-panel-description  class="card-description" *ngIf="(journaledToday$ | async) == 'false' || (journaledToday$ | async) == 'new'">
 				Enter journal data here.
 			</mat-panel-description>
-			<mat-panel-description *ngIf="(journaledToday$ | async) == 'true'">
+			<mat-panel-description class="card-description" *ngIf="(journaledToday$ | async) == 'true'">
 				Submit more events/symptoms today to add to the day's entry.
 			</mat-panel-description>
 		</mat-expansion-panel-header>
@@ -119,7 +119,7 @@
 	There was an error while submitting your entry.
 </div>
 <div class="button-container">
-	<button mat-button *ngIf="formEvents && formConditions" (click)="submitEntry()">SUBMIT</button>
+	<button mat-button *ngIf="formEvents && formConditions" (click)="submitEntry()">Submit</button>
 </div>
 </mat-expansion-panel>
 </mat-accordion>
@@ -132,16 +132,16 @@
 			<mat-panel-title>
 				Journal View
 			</mat-panel-title>
-			<mat-panel-description *ngIf="viewOpenState == false && (entryCount$ | async) >= 15">
+			<mat-panel-description class="card-description" *ngIf="viewOpenState == false && (entryCount$ | async) >= 15">
 				View journal data here.
 			</mat-panel-description>
-			<mat-panel-description *ngIf="viewOpenState == true && (entryCount$ | async) >= 15">
+			<mat-panel-description class="card-description" *ngIf="viewOpenState == true && (entryCount$ | async) >= 15">
 				Your symptoms
 			</mat-panel-description>
-			<mat-panel-description *ngIf="viewOpenState == false && (entryCount$ | async) < 15">
+			<mat-panel-description class="card-description" *ngIf="viewOpenState == false && (entryCount$ | async) < 15">
 				No data to show yet
 			</mat-panel-description>
-			<mat-panel-description *ngIf="viewOpenState == true && (entryCount$ | async) < 15">
+			<mat-panel-description class="card-description" *ngIf="viewOpenState == true && (entryCount$ | async) < 15">
 				No data to show yet
 			</mat-panel-description>
 		</mat-expansion-panel-header>
@@ -168,5 +168,5 @@
 </div>
 <div id="footer">
 	<div (click)="guideDialog()">
-	Canary 0.9-b2
+	Canary 0.9-b3
 </div>

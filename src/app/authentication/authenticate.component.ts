@@ -15,18 +15,15 @@ export class AuthenticateComponent implements OnInit {
 	public email: string;
 	public password: string;
 
-	constructor(
-		public afAuth: AngularFireAuth,
-		public authService: AuthenticateService,
-		public router: Router,
-		private dialog: MatDialog) {}
+	constructor(public afAuth: AngularFireAuth, public authService: AuthenticateService, public router: Router, private dialog: MatDialog) {}
 
-	newAccountDialog() {
+	newAccountDialog(status: string) {
 		const dialogConfig = new MatDialogConfig();
 		dialogConfig.data = {
-			email: this.email,
-			password: this.password
-		}
+				status: status,
+				email: this.email,
+				password: this.password
+			}
 		let dialogRef = this.dialog.open(AuthDialogComponent, dialogConfig);
 	}
 
@@ -36,12 +33,9 @@ export class AuthenticateComponent implements OnInit {
 			if (status === 'success') {
 				console.log('You are now authenticated.');
 				this.router.navigate(['journal']);
-			} else if (status === 'new') {
-				this.newAccountDialog();
-			} else if (status === 'invalid') {
-				alert('It looks like your credentials were wrong.');
 			} else {
-				alert(`Something went terribly wrong: ${status}`);
+				this.newAccountDialog(status);
+				console.log('Authentication status: ', status);
 			}
 		})
 	}

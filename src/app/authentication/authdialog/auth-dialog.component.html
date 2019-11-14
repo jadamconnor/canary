@@ -1,10 +1,63 @@
-<h2 mat-dialog-title>Create New Account?</h2>
+<div *ngIf="status == 'new'">
+  <h2 mat-dialog-title>Create New Account?</h2>
 
-<mat-dialog-content>
-<p>This account doesn't seem to exist. Would you like to create a new account using these credentials?</p>
-</mat-dialog-content>
+  <mat-dialog-content>
+    <p>This account doesn't seem to exist. Would you like to create a new account using these credentials?</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions id="auth-dialog-buttons">
+    <button mat-button (click)="closeDialog()">Cancel</button>
+    <button mat-button color="primary" (click)="createAccount()">Create</button>
+  </mat-dialog-actions>
+</div>
+<div *ngIf="status == 'invalid'">
+  <h2 mat-dialog-title>Wrong Password</h2>
+
+  <mat-dialog-content>
+    <p>Your credentials appear to be incorrect. Please re-enter your password and try again.</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions id="auth-dialog-buttons">
+    <button mat-button (click)="closeDialog()">Cancel</button>
+    <button mat-button color="warn" (click)="forgotCreds()">Forgot?</button>
+  </mat-dialog-actions>
+</div>
+<div *ngIf="status == 'reset success'">
+  <h2 mat-dialog-title>Reset Instructions Sent</h2>
+
+  <mat-dialog-content>
+    <p>If this user exists, instructions to reset your password have been sent to {{ email }}.
+      If this is not the email address you used to register, please attempt to login with that email address.
+      Since, this application does not collect personal information about its users, you must remember your email address to retrieve account information.
+    </p>
+  </mat-dialog-content>
 
 <mat-dialog-actions id="auth-dialog-buttons">
-    <button mat-raised-button color="warn" (click)="closeDialog()">Cancel</button>
-    <button mat-raised-button color="primary" (click)="createAccount()">Create</button>
-</mat-dialog-actions>
+    <button mat-button (click)="closeDialog()">Ok</button>
+  </mat-dialog-actions>
+</div>
+<div *ngIf="status == 'unverified'">
+  <h2 mat-dialog-title>Verify Email Address</h2>
+
+  <mat-dialog-content>
+    <p>
+      Please check the email address used to create this account and follow the instructions to verify it. Since
+      this app does not colect its users' personal information, a valid email address is required.
+    </p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions id="auth-dialog-buttons">
+    <button mat-button (click)="closeDialog()">Ok</button>
+  </mat-dialog-actions>
+</div>
+<div *ngIf="status != 'invalid' && status != 'new' && status != 'reset success' && status != 'unverified'">
+  <h2 mat-dialog-title>Authentication Error</h2>
+
+  <mat-dialog-content>
+    <p>There's been an error. The authentication service responded with the following status: {{ status }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions id="auth-dialog-buttons">
+    <button mat-button (click)="closeDialog()">Ok</button>
+  </mat-dialog-actions>
+</div>

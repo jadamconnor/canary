@@ -11,6 +11,7 @@ import { AuthenticateService } from '../authenticate.service';
 export class AuthDialogComponent {
     private email: string;
     private password: string;
+    public status: string;
 
     constructor(
         public afAuth: AngularFireAuth,
@@ -20,18 +21,25 @@ export class AuthDialogComponent {
         public authService: AuthenticateService){
         this.email = data.email;
         this.password = data.password;
+        this.status = data.status;
     }
 
     createAccount() {
         this.authService.createAccount(this.email, this.password)
         .subscribe(createNew => {
             if (createNew == true) {
-                this.dialogRef.close();
-                this.router.navigate(['journal']);
+                this.status = 'unverified';
             } else {
                 alert('Something went horribly wrong. Try that again.')
             }
         })
+    }
+
+    forgotCreds() {
+      this.authService.forgotCreds(this.email)
+      .subscribe(success => {
+        success ? this.status = 'reset success' : this.status = 'reset failure';
+      })
     }
 
     closeDialog() {
