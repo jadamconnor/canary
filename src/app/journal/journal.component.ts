@@ -152,6 +152,7 @@ export class JournalComponent implements OnInit {
   }
 
   private _filterEvents(value: string): string[] {
+    console.log(event)
     const filterValue = value.toLowerCase();
     return this.renderedEvents.filter(event => event.toLowerCase().indexOf(filterValue) === 0);
   }

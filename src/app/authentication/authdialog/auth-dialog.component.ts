@@ -9,8 +9,8 @@ import { AuthenticateService } from '../authenticate.service';
     templateUrl: "./auth-dialog.component.html"
 })
 export class AuthDialogComponent {
-    private email: string;
-    private password: string;
+    public email: string;
+    public password: string;
     public status: string;
 
     constructor(
