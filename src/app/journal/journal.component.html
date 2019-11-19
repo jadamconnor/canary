@@ -121,7 +121,7 @@
 		There was an error while submitting your entry.
 	</div>
 	<div class="button-container">
-		<button mat-button *ngIf="formEvents && formConditions" (click)="submitEntry()">Submit</button>
+		<button mat-button color="primary" *ngIf="formEvents && formConditions" (click)="submitEntry()">Submit</button>
 	</div>
 </mat-expansion-panel>
 </mat-accordion>
@@ -149,10 +149,10 @@
 				<div *ngIf="" class="no-corr">
 					</div>
 				<div *ngFor="let event of condition.value | keyvalue" id="">
-					<div *ngIf="event.value >= 0.25" [ngStyle]="{'background-color': 'rgba(242, 17, 88,'+event.value+')'}" class="data-item">
+					<div *ngIf="event.value >= 0.25" [ngStyle]="{'background-color': 'rgba(231,60,126,'+event.value+')'}" class="data-item">
 						{{ event.key }}
 					</div>
-					<div *ngIf="event.value <= -0.25" [ngStyle]="{'background-color': 'rgba(17, 242, 167,'+(event.value+(-event.value*2))+')'}" class="data-item">
+					<div *ngIf="event.value <= -0.25" [ngStyle]="{'background-color': 'rgba(35,166,213,'+(event.value+(-event.value*2))+')'}" class="data-item">
 						{{ event.key }}
 					</div>
 				</div>
