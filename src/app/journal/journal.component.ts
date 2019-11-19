@@ -86,7 +86,7 @@ export class JournalComponent implements OnInit {
   addEventChip(event: MatChipInputEvent): void {
     if (!this.eventAutocomplete.isOpen) {
       const input = event.input;
-      const value = event.value;
+      const value = event.value.toLowerCase();
       if ((value || '').trim()) {
         this.formEvents.push(value.trim());
       }
@@ -99,7 +99,7 @@ export class JournalComponent implements OnInit {
   addConditionChip(event: MatChipInputEvent): void {
     if (!this.condAutocomplete.isOpen) {
       const input = event.input;
-      const value = event.value;
+      const value = event.value.toLowerCase();
       if ((value || '').trim()) {
         this.formConditions.push(value.trim());
       }
