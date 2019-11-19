@@ -113,10 +113,11 @@
 			</mat-autocomplete>
 		</mat-form-field>
 	</div>
-	<div *ngIf="(submissionStatus$ | async) == true" id="entry-success">
+	<!-- Add this again once we add a fadeout animation -->
+	<!-- <div *ngIf="(submissionStatus$ | async) == true" class="entry-status-message" id="entry-success">
 		Entry successfully submitted.
-	</div>
-	<div *ngIf="(submissionStatus$ | async) == false" id="entry-fail">
+	</div> -->
+	<div *ngIf="(submissionStatus$ | async) == false" class="entry-status-message" id="entry-fail">
 		There was an error while submitting your entry.
 	</div>
 	<div class="button-container">
@@ -133,24 +134,20 @@
 			<mat-panel-title>
 				Journal View
 			</mat-panel-title>
-			<mat-panel-description class="card-description" *ngIf="viewOpenState == false && (entryCount$ | async) >= 15">
-				View journal data here.
+			<mat-panel-description class="card-description" *ngIf="viewOpenState == false">
+				View journal data here
 			</mat-panel-description>
-			<mat-panel-description class="card-description" *ngIf="viewOpenState == true && (entryCount$ | async) >= 15">
+			<mat-panel-description class="card-description" *ngIf="viewOpenState == true">
 				Your symptoms
-			</mat-panel-description>
-			<mat-panel-description class="card-description" *ngIf="viewOpenState == false && (entryCount$ | async) < 15">
-				No data to show yet
-			</mat-panel-description>
-			<mat-panel-description class="card-description" *ngIf="viewOpenState == true && (entryCount$ | async) < 15">
-				No data to show yet
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 		<div *ngIf="(entryCount$ | async) >= 15" class="view-group">
 			<div *ngFor="let condition of (journalData$ | async) | keyvalue" class="data-list">
 				<div class="data-heading">
-					{{ condition.key }}:
+					{{ condition.key }}
 				</div>
+				<div *ngIf="" class="no-corr">
+					</div>
 				<div *ngFor="let event of condition.value | keyvalue" id="">
 					<div *ngIf="event.value >= 0.25" [ngStyle]="{'background-color': 'rgba(242, 17, 88,'+event.value+')'}" class="data-item">
 						{{ event.key }}
@@ -167,4 +164,8 @@
 	</mat-expansion-panel>
 </mat-accordion>
 </div>
+<div id="footer">
+	<div (click)="guideDialog()">
+		Canary 0.9-b4
+	</div>
 </div>

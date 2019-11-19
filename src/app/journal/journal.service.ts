@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from '@angular/fire/firestore';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { Entry } from '../entry';
 import { AuthenticateService } from '../authentication/authenticate.service';
-import { count, map, take, tap, filter } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
 
@@ -19,6 +19,8 @@ export class JournalService {
 	public userFields: Observable<UserDoc>;
 	public userEntries: Observable<Entry[]>;
 	public submitStatus = new Subject<boolean>();
+	public date = Date.now();
+	private docSub: Subscription;
 
 	constructor(private db: AngularFirestore, authService: AuthenticateService) {
 		this.user = authService.user;
@@ -63,6 +65,7 @@ export class JournalService {
 			.then(docRef => {
 				this.submitStatus.next(true);
 				console.log('Document updated.');
+				this.docSub.unsubscribe();
 			})
 			.catch(error => {
 				this.submitStatus.next(false);
@@ -98,6 +101,7 @@ export class JournalService {
 	}
 
 	updateUserTables(uid: string, entry: Entry) {
+		// This gets called more and more times as we submit entries. I assume it's getting called in a subscription. Look into this.
 		if (entry.conditions.length > 0 && entry.events.length > 0) {
 			this.db.doc(`users/${uid}`).update({
 				myEvents: firebase.firestore.FieldValue.arrayUnion(...entry.events),
@@ -158,7 +162,7 @@ export class JournalService {
 	submitEntry(entry: Entry) {
 		let newDay = true;
 		this.user.subscribe(user => {
-			this.userDoc.valueChanges().subscribe(data => {
+			this.docSub = this.userDoc.valueChanges().subscribe(data => {
 				if (data) {
 					this.updateUserTables(user.uid, entry);
 				} else {
@@ -173,6 +177,8 @@ export class JournalService {
 					.subscribe(entries => {
 						for (let e of entries) {
 							if (this.isToday(e.date)) {
+								// Note: if there's more than one entry for today, this well call updateEntry for each.
+								// Shouldn't ever be an issue, but something to remember if the design changes.
 								newDay = false;
 								this.updateEntry(user.uid, entry, e);
 							}

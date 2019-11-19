@@ -52,16 +52,19 @@ export class JournalComponent implements OnInit {
   @ViewChild('conditionInput', {static: false}) conditionInput: ElementRef<HTMLInputElement>;
   @ViewChild('autoCond', {static: false}) condAutocomplete: MatAutocomplete;
 
-  constructor(
-    private authService: AuthenticateService,
-    private journalService: JournalService,
-		private dialog: MatDialog) {
+  constructor(private authService: AuthenticateService, private journalService: JournalService, private dialog: MatDialog) {
+    // Return an array of myConditions to filter for autocomplete.
     this.journalService.getMyConditions().subscribe(conditions => this.renderedConditions = conditions);
+    // Return an observable that emits form input values to filter for autocomplete.
+    // If the input is empy just map an empty array to it. Could also map to all of myConditions to it with this.renderedConditions.slice()
     this.filteredConditions$ = this.condCtrl.valueChanges
-    .pipe(startWith(null),map((condition: string | null) => condition ? this._filterConditions(condition) : this.renderedConditions.slice()));
+    .pipe(startWith(null),map((condition: string | null) => condition ? this._filterConditions(condition) : []));
+    // Return an array of myConditions to filter for autocomplete.
     this.journalService.getMyEvents().subscribe(events => this.renderedEvents = events);
+    // Return an observable that emits form input values to filter for autocomplete.
+    // If the input is empy just map an empty array to it. Could also map to all of myConditions to it with this.renderedConditions.slice()
     this.filteredEvents$ = this.eventCtrl.valueChanges
-    .pipe(startWith(null), map((event: string | null) => event ? this._filterEvents(event) : this.renderedEvents.slice()));
+    .pipe(startWith(null), map((event: string | null) => event ? this._filterEvents(event) : []));
   }
 
   getDate() {
@@ -126,7 +129,6 @@ export class JournalComponent implements OnInit {
       this.journalService.editDaysEvents(event);
     } else {
       this.signOut();
-      console.log('modal warning that the day is over.');
     }
   }
 
@@ -135,7 +137,6 @@ export class JournalComponent implements OnInit {
       this.journalService.editDaysConditions(condition);
     } else {
       this.signOut();
-      console.log('modal warning that the day is over.');
     }
   }
 
@@ -152,7 +153,6 @@ export class JournalComponent implements OnInit {
   }
 
   private _filterEvents(value: string): string[] {
-    console.log(event)
     const filterValue = value.toLowerCase();
     return this.renderedEvents.filter(event => event.toLowerCase().indexOf(filterValue) === 0);
   }
@@ -178,7 +178,6 @@ export class JournalComponent implements OnInit {
       }
     })
   }
-
 
   signOut() {
     this.authService.signOut();
