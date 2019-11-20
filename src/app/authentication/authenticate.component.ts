@@ -1,16 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AuthenticateService } from './authenticate.service';
 import { AuthDialogComponent } from './authdialog/auth-dialog.component';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from "@angular/material";
+import { take } from 'rxjs/operators';
 
 @Component({
 	selector: 'app-authenticate',
 	templateUrl: './authenticate.component.html',
 	styleUrls: ['./authenticate.component.css']
 })
-export class AuthenticateComponent implements OnInit {
+export class AuthenticateComponent {
 
 	public email: string;
 	public password: string;
@@ -29,6 +30,7 @@ export class AuthenticateComponent implements OnInit {
 
 	authenticate() {
 		this.authService.authenticate(this.email, this.password)
+		.pipe(take(1))
 		.subscribe(status => {
 			if (status === 'success') {
 				console.log('You are now authenticated.');
@@ -38,10 +40,6 @@ export class AuthenticateComponent implements OnInit {
 				console.log('Authentication status: ', status);
 			}
 		})
-	}
-
-
-	ngOnInit() {
 	}
 
 }

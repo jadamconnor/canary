@@ -1,13 +1,13 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Observable, interval } from 'rxjs';
+import { Observable, interval, Subscription } from 'rxjs';
 import { Entry } from '../entry';
 import { AuthenticateService } from '../authentication/authenticate.service';
 import { JournalService } from './journal.service';
 import { MatAutocompleteSelectedEvent, MatAutocomplete } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith, take } from 'rxjs/operators';
 import { faBook, faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 import { GuideDialogComponent } from './guide-dialog/guide-dialog.component';
 import { MatDialog, MatDialogConfig } from "@angular/material";
@@ -22,6 +22,7 @@ export class JournalComponent implements OnInit {
   public now: string = new Date().toDateString();
   public entry: Entry;
   public daysEntry$: Observable<Entry>;
+  private daysEntrySub: Subscription;
   public daysEvents$: Observable<string[]>;
   public daysConditions$: Observable<string[]>;
   private daysEntryDate: number;
@@ -46,6 +47,8 @@ export class JournalComponent implements OnInit {
   filteredConditions$: Observable<string[]>;
   eventCtrl = new FormControl();
   filteredEvents$: Observable<string[]>;
+  private myConditionsSub: Subscription;
+  private myEventsSub: Subscription;
 
   @ViewChild('eventInput', {static: false}) eventInput: ElementRef<HTMLInputElement>;
   @ViewChild('autoEvent', {static: false}) eventAutocomplete: MatAutocomplete;
@@ -54,13 +57,13 @@ export class JournalComponent implements OnInit {
 
   constructor(private authService: AuthenticateService, private journalService: JournalService, private dialog: MatDialog) {
     // Return an array of myConditions to filter for autocomplete.
-    this.journalService.getMyConditions().subscribe(conditions => this.renderedConditions = conditions);
+    this.myConditionsSub = this.journalService.getMyConditions().subscribe(conditions => this.renderedConditions = conditions);
     // Return an observable that emits form input values to filter for autocomplete.
     // If the input is empy just map an empty array to it. Could also map to all of myConditions to it with this.renderedConditions.slice()
     this.filteredConditions$ = this.condCtrl.valueChanges
     .pipe(startWith(null),map((condition: string | null) => condition ? this._filterConditions(condition) : []));
     // Return an array of myConditions to filter for autocomplete.
-    this.journalService.getMyEvents().subscribe(events => this.renderedEvents = events);
+    this.myEventsSub = this.journalService.getMyEvents().subscribe(events => this.renderedEvents = events);
     // Return an observable that emits form input values to filter for autocomplete.
     // If the input is empy just map an empty array to it. Could also map to all of myConditions to it with this.renderedConditions.slice()
     this.filteredEvents$ = this.eventCtrl.valueChanges
@@ -171,7 +174,9 @@ export class JournalComponent implements OnInit {
     };
     this.journalService.submitEntry(this.entry);
     this.submissionStatus$ = this.journalService.submitStatus;
-    this.submissionStatus$.subscribe(status => {
+    this.submissionStatus$
+    .pipe(take(1))
+    .subscribe(status => {
       if (status === true) {
         this.formEvents = [];
         this.formConditions = [];
@@ -187,7 +192,7 @@ export class JournalComponent implements OnInit {
     this.journaledToday$ = this.journalService.journaledToday().pipe(map(data => data ? data : 'false'));
     this.journalData$ = this.journalService.formJournalData();
     this.daysEntry$ = this.journalService.getDaysEntry();
-    this.daysEntry$.subscribe(entry => {
+    this.daysEntrySub = this.daysEntry$.subscribe(entry => {
       if (entry[0]) {
         this.daysEntryDate = entry[0].date;
       }
@@ -198,7 +203,10 @@ export class JournalComponent implements OnInit {
   }
 
   ngOnDestroy() {
-
+    // Let's do all these together. See https://medium.com/@benlesh/rxjs-dont-unsubscribe-6753ed4fda87
+    this.daysEntrySub.unsubscribe();
+    this.myConditionsSub.unsubscribe();
+    this.myEventsSub.unsubscribe();
   }
 
 }

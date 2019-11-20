@@ -24,7 +24,9 @@ export class JournalService {
 
 	constructor(private db: AngularFirestore, authService: AuthenticateService) {
 		this.user = authService.user;
-		this.user.subscribe(user => {
+		this.user
+		.pipe(take(1))
+		.subscribe(user => {
 			this.userDoc = this.db.doc<UserDoc>(`users/${user.uid}`);
 		});
 	}
@@ -161,8 +163,12 @@ export class JournalService {
 
 	submitEntry(entry: Entry) {
 		let newDay = true;
-		this.user.subscribe(user => {
-			this.docSub = this.userDoc.valueChanges().subscribe(data => {
+		this.user
+		.pipe(take(1))
+		.subscribe(user => {
+			this.docSub = this.userDoc.valueChanges()
+			.pipe(take(1))
+			.subscribe(data => {
 				if (data) {
 					this.updateUserTables(user.uid, entry);
 				} else {
@@ -206,6 +212,7 @@ export class JournalService {
 	lastJournaled(): Observable<Date> {
 		let lastJournaled = new Subject<Date>();
 		this.getEntries()
+		.pipe(take(1))
 		.subscribe(data => {
 			lastJournaled.next(data[data.length - 1].date);
 		});
@@ -215,6 +222,7 @@ export class JournalService {
 	journaledToday(): Observable<string> {
 		let journaled = new Subject<string>();
 		this.userDoc.collection('entries').valueChanges()
+		.pipe(take(1))
 		.subscribe(data => {
 			if (data[0] != undefined) {
 				if (this.isToday((data[data.length - 1].date))) {
@@ -233,9 +241,12 @@ export class JournalService {
 		let i = 1;
 		let table = [0, 0, 0, 0];
 		let co = new Subject<number>();
-		this.user.subscribe(user => {
+		this.user
+		.pipe(take(1))
+		.subscribe(user => {
 			this.userDoc = this.db.doc<UserDoc>(`users/${user.uid}`);
 			this.getEntries()
+			.pipe(take(1))
 			.subscribe(entries => {
 				for (let entry of entries) {
 					if (!entry.conditions.includes(condition) && !entry.events.includes(event)) {
@@ -261,12 +272,18 @@ export class JournalService {
 	formJournalData(): Observable<any> {
 		let jData = {};
 		let journalData = new Subject<any>();
-		this.getMyConditions().subscribe(conditions => {
+		this.getMyConditions()
+		.pipe(take(1))
+		.subscribe(conditions => {
 			conditions.forEach(condition => {
 				jData[condition] = {};
-				this.getMyEvents().subscribe(events => {
+				this.getMyEvents()
+				.pipe(take(1))
+				.subscribe(events => {
 					events.forEach(event => {
-						this.phi(event, condition).subscribe(data => {
+						this.phi(event, condition)
+						.pipe(take(1))
+						.subscribe(data => {
 							jData[condition][event] = data;
 						});
 					});
@@ -279,8 +296,11 @@ export class JournalService {
 
 	getMyEvents(): Observable<string[]> {
 		let myEvents = new Subject<string[]>();
-		this.user.subscribe(user => {
+		this.user
+		.pipe(take(1))
+		.subscribe(user => {
 			this.db.doc<UserDoc>(`users/${user.uid}`).valueChanges()
+			.pipe(take(1))
 			.subscribe(data => {
 				data ? myEvents.next(data.myEvents) : myEvents.next([]);
 			})
@@ -290,8 +310,11 @@ export class JournalService {
 
 	getMyConditions(): Observable<string[]> {
 		let myConditions = new Subject<string[]>();
-		this.user.subscribe(user => {
+		this.user
+		.pipe(take(1))
+		.subscribe(user => {
 			this.db.doc<UserDoc>(`users/${user.uid}`).valueChanges()
+			.pipe(take(1))
 			.subscribe(data => {
 				data ? myConditions.next(data.myConditions) : myConditions.next([]);
 			})
@@ -300,7 +323,9 @@ export class JournalService {
 	}
 
 	editDaysEvents(event: string) {
-		this.user.subscribe(user => {
+		this.user
+		.pipe(take(1))
+		.subscribe(user => {
 			this.getEntries()
 			.pipe(take(1))
 			.subscribe(entries => {
@@ -321,7 +346,9 @@ export class JournalService {
 	}
 
 	editDaysConditions(condition: string) {
-		this.user.subscribe(user => {
+		this.user
+		.pipe(take(1))
+		.subscribe(user => {
 			this.getEntries()
 			.pipe(take(1))
 			.subscribe(entries => {
