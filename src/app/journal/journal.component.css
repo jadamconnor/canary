@@ -1,10 +1,11 @@
 #journal-container {
 	width: calc(100vw - 100px);
-	margin: 5px 50px;
+	margin: 0 50px;
 }
 
 #journal-header-container {
 	display: inline-flex;
+	margin-top: 10px;
 }
 
 #journal-header-avatar {
